@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Offcanvas, Container, Nav, Navbar, Button, ButtonGroup } from 'react-bootstrap';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { BOOKLETS_PATH, BOOKLETS_DEFINE_NEW_PATH } from '../paths';
+import { BOOKLETS_PATH } from '../paths';
+import NotificationToast from './NotificationToast';
 
 function MainLayout() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function MainLayout() {
 
   return (
     <>
+      <NotificationToast />
       <div className="App">
         <Navbar expand={false} className="bg-body-tertiary mb-3" >
           <Container fluid>

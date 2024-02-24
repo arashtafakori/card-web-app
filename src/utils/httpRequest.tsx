@@ -22,7 +22,7 @@ export class ModelState {
         pageNumber: null,
         pageSize: null,
         totalPages: null,
-        countOfAllItems: 0,
+        numberOfTotalItems: 0,
         hasPreviousPage: false,
         hasNextPage: false,
         items: []

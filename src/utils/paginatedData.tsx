@@ -2,7 +2,7 @@ export interface PaginatedData<T> {
     pageNumber: number | null;
     pageSize: number | null;
     totalPages: number | null;
-    countOfAllItems: number;
+    numberOfTotalItems: number;
     hasPreviousPage: boolean,
     hasNextPage: boolean,
     items: T[];
