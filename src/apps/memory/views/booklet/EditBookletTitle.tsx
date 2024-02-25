@@ -2,8 +2,11 @@ import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
 import * as formik from 'formik';
 import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { editBookletTitle } from '../../redux/booklet/api';
+import { notifyError } from '../../redux/booklet/reducers/notificationReducer';
+import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
+import { PaginatedData } from '../../../../utils/paginatedData';
 import { Booklet } from '../../models/booklet';
 
 interface FormValues {
@@ -42,10 +45,15 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
         approveSubmitting();
         onHide();
       })
-      .catch((err: any) => {
-        // alert(JSON.stringify(err, null, 2));
+      .catch((error: any) => {
+        dispatch(notifyError(error));
       });
   };
+
+  const httpState = useSelector(
+    (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
+    const isLoading = httpState.status === httpRequestStatus.Pending
+     && httpState.typePrefix === editBookletTitle.typePrefix ;
 
   return (
     <Row className="row justify-content-center">
@@ -92,10 +100,18 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
               <Row className="mb-3">
                 <Col xs={12} className="gy-6">
                   <div className="d-flex justify-content-end gap-3">
-                    <Button variant="outline-secondary" onClick={onHide} size="sm" className="px-5 px-sm-5">
+                    <Button variant="outline-secondary" 
+                    disabled={isLoading}
+                    onClick={onHide} size="sm" className="px-5 px-sm-5">
                       Cancel
                     </Button>
-                    <Button type="submit" variant="outline-primary" size="sm" className="px-5 px-sm-5">
+                    <Button type="submit" 
+                    disabled={isLoading}
+                    variant="outline-primary" size="sm" className="px-5 px-sm-5">
+                    {
+                        isLoading &&
+                        <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      }
                       Edit
                     </Button>
                   </div>

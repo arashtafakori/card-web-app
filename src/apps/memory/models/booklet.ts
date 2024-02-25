@@ -16,6 +16,7 @@ export const initialBooklet: httpState<Booklet> = {
     modifiedDate: ''
   },
   status: httpRequestStatus.Pending,
-  error: null
+  error: null,
+  typePrefix: null
 };
  

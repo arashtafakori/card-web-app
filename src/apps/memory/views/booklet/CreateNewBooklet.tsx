@@ -2,9 +2,12 @@ import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
 import * as formik from 'formik';
 import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createNewBooklet } from '../../redux/booklet/api';
 import { notifyError } from '../../redux/booklet/reducers/notificationReducer';
+import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
+import { PaginatedData } from '../../../../utils/paginatedData';
+import { Booklet } from '../../models/booklet';
 
 interface FormValues {
   title: string;
@@ -16,7 +19,6 @@ const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
   };
 
   const { Formik } = formik;
-
   const title_maxLength = 50;
 
   const schema = yup.object().shape({
@@ -39,6 +41,11 @@ const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
         dispatch(notifyError(error));
       });
   };
+
+  const httpState = useSelector(
+    (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
+  const isLoading = httpState.status === httpRequestStatus.Pending 
+  && httpState.typePrefix === createNewBooklet.typePrefix ;
 
   return (
     <Row className="row justify-content-center">
@@ -85,10 +92,18 @@ const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
               <Row className="mb-3">
                 <Col xs={12} className="gy-6">
                   <div className="d-flex justify-content-end gap-3">
-                    <Button variant="outline-secondary" onClick={onHide} size="sm" className="px-5 px-sm-5">
+                    <Button variant="outline-secondary" 
+                    disabled={isLoading}
+                     onClick={onHide} size="sm" className="px-5 px-sm-5">
                       Cancel
                     </Button>
-                    <Button type="submit" variant="outline-primary" size="sm" className="px-5 px-sm-5">
+                    <Button type="submit" 
+                    disabled={isLoading} 
+                    variant="outline-primary" size="sm" className="px-5 px-sm-5">
+                      {
+                        isLoading &&
+                        <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      }
                       Create
                     </Button>
                   </div>

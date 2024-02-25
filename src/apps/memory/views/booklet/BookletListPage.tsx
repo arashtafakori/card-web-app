@@ -1,10 +1,10 @@
 
-import { Row, Col, Modal, Spinner } from 'react-bootstrap';
+import { Row, Col, Modal, Spinner, Container, Navbar } from 'react-bootstrap';
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from 'react';
 import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
 import { PaginatedData } from '../../../../utils/paginatedData';
-import { getBookletsList } from '../../redux/booklet/api';
+import { createNewBooklet, getBookletsList } from '../../redux/booklet/api';
 import "../../redux/store";
 import { Booklet } from '../../models/booklet';
 import BookletItem from './BookletItem';
@@ -37,42 +37,52 @@ const BookletListPage = () => {
 
   const httpState = useSelector(
     (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
+  const isLoading = httpState.status === httpRequestStatus.Pending
+    && httpState.typePrefix === getBookletsList.typePrefix;
 
   useEffect(() => {
-    window.scrollTo(0, scrollRef.current);
+    if (httpState.typePrefix == createNewBooklet.typePrefix)
+      window.scrollTo(0, 0);
+    else
+      window.scrollTo(0, scrollRef.current);
   }, [httpState]);
 
   const catchPageState = () => {
     scrollRef.current = window.scrollY;
   };
-  
+
   return (
     <>
-       {
-        httpState.status === httpRequestStatus.Pending &&
-        <PageSpinner/>
-       }
- 
-      <Row className="row justify-content-center">
-        <Col xs={12} md={10} lg style={{ paddingLeft: '20px', paddingRight: '20px' }}>
-          <div className="d-flex align-items-center flex-wrap gap-x-5 gap-y-3 mb-3">
-            {/* <SearchBox placeholder="Search booklets" style={{ maxWidth: '30rem' }} /> */}
-            <div>
-              <Button variant="outline-primary" size="sm" onClick={handleNewItemModelShow}>
-                <AiOutlinePlus /> New booklet
-              </Button>
-            </div>
-          </div>
+      {
+        isLoading &&
+        <PageSpinner />
+      }
 
+      <div>
+        <Navbar fixed="top" className="bg-body-tertiary" style={{ height: '56px', zIndex: '999' }}>
+          <div className="d-flex align-items-center flex-wrap gap-x-5 gap-y-3">
+            {<Row className="row justify-content-center">
+              <Col xs={12} md={10} lg style={{ paddingLeft: '100px', paddingRight: '20px' }}>
+                {/* <SearchBox placeholder="Search booklets" style={{ maxWidth: '30rem' }} /> */}
+                <div>
+                  <Button variant="outline-primary" size="sm" onClick={handleNewItemModelShow}>
+                    <AiOutlinePlus /> New booklet
+                  </Button>
+                </div>
+              </Col>
+            </Row>}
+          </div>
+        </Navbar>
+
+        <Container fluid>
           <div className="px-lg-1">
             {
               httpState.data?.items.map((booklet, index) => (
                 <BookletItem onCatchPageState={catchPageState} index={index} booklet={booklet} key={booklet.id} />))
             }
           </div>
-        </Col>
-      </Row>
-
+        </Container>
+      </div>
       <Modal
         size="lg"
         show={showNewItemModel}

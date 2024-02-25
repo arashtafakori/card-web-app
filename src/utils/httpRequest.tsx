@@ -1,19 +1,21 @@
-import {PaginatedData} from './paginatedData';
+import { PaginatedData } from './paginatedData';
 
 export enum httpRequestStatus {
   Pending,
   Fullfilled,
-  Rejected
+  Rejected,
+  Settled
 }
 
 export interface httpState<TData> {
   data: TData | null;
   status: httpRequestStatus,
-  error: null
+  error: null,
+  typePrefix: null
 }
 export class ModelState {
   public static initiateModel<TModel>(): TModel {
-    return new (class {}) as TModel;
+    return new (class { }) as TModel;
   }
 
   public static initiatePaginatedData<TModel>(): httpState<PaginatedData<TModel>> {
@@ -28,7 +30,27 @@ export class ModelState {
         items: []
       },
       status: httpRequestStatus.Pending,
-      error: null
+      error: null,
+      typePrefix: null
     };
   }
+}
+
+export function getTypePrefix(methodType: string): string {
+  const parts = methodType.split('/');
+  parts.pop();
+  return parts.join('/');
+}
+export function getStatus(methodType: string): httpRequestStatus | null {
+  const status = methodType.split('/').slice(-1)[0];
+  if (status === 'pending')
+    return httpRequestStatus.Pending;
+  else if (status === 'fullfilled')
+    return httpRequestStatus.Fullfilled;
+  else if (status === 'rejected')
+    return httpRequestStatus.Rejected;
+  else if (status === 'settled')
+    return httpRequestStatus.Settled;
+
+  return null
 }
