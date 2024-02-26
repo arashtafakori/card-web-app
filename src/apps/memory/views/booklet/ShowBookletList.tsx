@@ -1,5 +1,5 @@
 
-import { Row, Col, Modal, Spinner, Container, Navbar } from 'react-bootstrap';
+import { Row, Col, Modal, Container, Navbar } from 'react-bootstrap';
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from 'react';
 import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
@@ -13,8 +13,9 @@ import { Button } from 'react-bootstrap';
 import { AiOutlinePlus } from 'react-icons/ai';
 import CreateNewBooklet from './CreateNewBooklet';
 import { PageSpinner } from '../../../../components/PageSpinner';
+import { notifyError } from '../../redux/general/reducers/notificationReducer';
 
-const BookletListPage = () => {
+const ShowBookletList = () => {
   const [showNewItemModel, setShowNewItemModel] = useState(false);
   const handleNewItemModelClose = () => setShowNewItemModel(false);
   const handleNewItemModelShow = () => {
@@ -32,7 +33,14 @@ const BookletListPage = () => {
   const scrollRef = useRef(0);
 
   useEffect(() => {
-    dispatch(getBookletsList());
+    dispatch(getBookletsList())
+      .unwrap()
+      .then((data: any) => {
+      })
+      .catch((error: any) => {
+        dispatch(notifyError(error));
+      });
+
   }, [dispatch]);
 
   const httpState = useSelector(
@@ -100,4 +108,4 @@ const BookletListPage = () => {
   );
 };
 
-export default BookletListPage;
+export default ShowBookletList;

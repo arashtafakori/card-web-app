@@ -4,8 +4,8 @@ import { RouteObject, createBrowserRouter } from 'react-router-dom';
 import ErrorPage from './pages/ErrorPage';
 import App from './App';
 import { BOOKLETS_PATH } from './paths';
-import BookletListPage from './apps/memory/views/booklet/BookletListPage';
-import BookletDetailPage from './apps/memory/views/booklet/BookletDetailPage';
+import ShowBookletList from './apps/memory/views/booklet/ShowBookletList';
+import ShowBooklet from './apps/memory/views/booklet/ShowBooklet';
 
 const routes: RouteObject[] = [
   {
@@ -25,12 +25,12 @@ const routes: RouteObject[] = [
               {
                 path: BOOKLETS_PATH,
                 index: true,
-                element: <BookletListPage />
+                element: <ShowBookletList />
               },
               {
                 path: BOOKLETS_PATH + "/:id",
                 index: true,
-                element: <BookletDetailPage />
+                element: <ShowBooklet />
               }
             ]
           }

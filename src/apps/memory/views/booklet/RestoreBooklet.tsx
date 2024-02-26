@@ -1,103 +1,65 @@
-import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
-import * as formik from 'formik';
-import * as yup from 'yup';
-import { FormikHelpers } from 'formik';
-import { useDispatch } from 'react-redux';
-import { createNewBooklet } from '../../redux/booklet/api';
+import { Row, Col, Button } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { restoreBooklet } from '../../redux/booklet/api';
+import { notifyError } from '../../redux/general/reducers/notificationReducer';
+import { httpRequestStatus } from '../../../../utils/httpRequest';
 import { Booklet } from '../../models/booklet';
-interface FormValues {
-  title: string;
-}
 
 interface BookletProps {
   booklet: Booklet;
   onHide: () => void;
 }
 
-const RestoreBooklet = ({booklet, onHide}: BookletProps) => {
-  const initialFormValues: FormValues = {
-    title: booklet.title
-  };
-  
-  const { Formik } = formik;
-
-  const title_maxLength = 50;
-
-  const schema = yup.object().shape({
-    title: yup.string()
-      .min(3, 'Too Short!')
-      .max(title_maxLength, 'Too Long!')
-      .required('Required')
-  });
-
+const RestoreBooklet = ({ booklet, onHide }: BookletProps) => {
   let dispatch = useDispatch<any>();
 
-  const handleCreateBooklet = (values: FormValues, approveSubmitting: Function) => {
-    dispatch(createNewBooklet(values))
+  const handleCreateBooklet = () => {
+    dispatch(restoreBooklet(booklet.id))
       .unwrap()
       .then((data: any) => {
-        approveSubmitting();
+        onHide();
       })
-      .catch((err: any) => {
-        // alert(JSON.stringify(err, null, 2));
+      .catch((error: any) => {
+        dispatch(notifyError(error));
       });
   };
+
+  const httpState = useSelector((state: any) => state.bookletsList);
+  const isLoading = httpState.status === httpRequestStatus.Pending
+    && httpState.typePrefix === restoreBooklet.typePrefix;
 
   return (
     <Row className="row justify-content-center">
       <Col>
-        <Formik
-          validationSchema={schema}
-          onSubmit={(
-            values: FormValues,
-            { setSubmitting }: FormikHelpers<FormValues>
-          ) => {
-            handleCreateBooklet(values,
-              () => {
-                setSubmitting(false);
-                onHide();
-              }
-            );
-          }}
-          initialValues={initialFormValues}
-        >
-          {({ handleSubmit, handleChange, values, touched, errors }) => (
-            <Form noValidate onSubmit={handleSubmit} >
-              <Row className="mb-3">
-                <Col>
-                  <Form.Group as={Col} controlId="validationFormik01">
-                    <Form.Label>Title</Form.Label>
-                    <InputGroup hasValidation>
-                      <Form.Control
-                        type="text"
-                        name="title"
-                        placeholder=""
-                        value={values.title}
-                        onChange={handleChange}
-                        isInvalid={!!errors.title}
-                        isValid={touched.title && !errors.title}
-                        maxLength={title_maxLength}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.title}
-                      </Form.Control.Feedback>
-                    </InputGroup>
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col xs={12} className="gy-6">
-                  <div className="d-flex justify-content-end gap-3">
-                    <Button type="submit" variant="outline-primary" size="sm" className="px-5 px-sm-5">
-                      Edit Booklet
-                    </Button>
-                  </div>
-                </Col>
-              </Row>
-            </Form>
-          )}
-        </Formik>
+        <Row>
+          <Col>
+            <div className="email-detail-content px-4">
+              <div className="text-1000 fs-9 w-100 w-md-75 mb-8">
+                <span style={{ fontSize: '12px' }}> Title: <span style={{ fontSize: '15px' }}> {booklet.title}  </span> </span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <Row className="mb-3">
+          <Col xs={12} className="gy-6">
+            <div className="d-flex justify-content-end gap-3">
+              <Button variant="outline-secondary"
+                disabled={isLoading}
+                onClick={onHide} size="sm" className="px-5 px-sm-5">
+                Cancel
+              </Button>
+              <Button variant="outline-secondary"
+                disabled={isLoading}
+                onClick={handleCreateBooklet} size="sm" className="px-5 px-sm-5">
+                {
+                  isLoading &&
+                  <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                }
+                Restore
+              </Button>
+            </div>
+          </Col>
+        </Row>
       </Col>
     </Row>
   );

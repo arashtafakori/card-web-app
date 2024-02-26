@@ -4,10 +4,9 @@ import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { editBookletTitle } from '../../redux/booklet/api';
-import { notifyError } from '../../redux/booklet/reducers/notificationReducer';
-import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
-import { PaginatedData } from '../../../../utils/paginatedData';
+import { httpRequestStatus } from '../../../../utils/httpRequest';
 import { Booklet } from '../../models/booklet';
+import { notifyError } from '../../redux/general/reducers/notificationReducer';
 
 interface FormValues {
   id: string;
@@ -50,8 +49,7 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
       });
   };
 
-  const httpState = useSelector(
-    (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
+  const httpState = useSelector((state: any) => state.bookletsList);
     const isLoading = httpState.status === httpRequestStatus.Pending
      && httpState.typePrefix === editBookletTitle.typePrefix ;
 

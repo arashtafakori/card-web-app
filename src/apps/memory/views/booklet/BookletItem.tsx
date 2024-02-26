@@ -1,10 +1,11 @@
 import { Col, Dropdown, Modal, Row } from 'react-bootstrap';
 import { Booklet } from '../../models/booklet';
 import { CiMenuKebab } from "react-icons/ci";
-import BookletDetail from './BookletDetail';
 import { useState } from 'react';
 import EditBookletTitle from './EditBookletTitle';
 import DeleteBooklet from './DeleteBooklet';
+import ArchiveBooklet from './ArchiveBooklet';
+import RestoreBooklet from './RestoreBooklet';
 
 interface BookletProps {
   booklet: Booklet;
@@ -13,32 +14,46 @@ interface BookletProps {
 }
 
 const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
-  const [showDetailModel, setShowDetailModel] = useState(false);
-  const handleDetailModelClose = () => setShowDetailModel(false);
-  const handleDetailModelShow = () => setShowDetailModel(true);
+  const [openShowModal, setOpenShowModal] = useState(false);
+  const handleShowModelClose = () => setOpenShowModal(false);
+  const handleShowModelOpen = () => setOpenShowModal(true);
 
-  const [showEditModel, setShowEditModel] = useState(false);
-  const handleEditModelClose = () => setShowEditModel(false);
-  const handleEditModelShow = () => {
-    setShowEditModel(true);
+  const [openEditModel, setOpenEditModel] = useState(false);
+  const handleEditModelClose = () => setOpenEditModel(false);
+  const handleEditModelOpen = () => {
+    setOpenEditModel(true);
     onCatchPageState();
   }
 
-  const [showDeleteModel, setShowDeleteModel] = useState(false);
+  const [openDeleteModel, setOpenDeleteModel] = useState(false);
   const handleDeleteModelClose = () => {
-    setShowDeleteModel(false);
+    setOpenDeleteModel(false);
   };
-  const handleDeleteModelShow = () => {
-    setShowDeleteModel(true);
+  const handleDeleteModelOpen = () => {
+    setOpenDeleteModel(true);
     onCatchPageState();
   };
+
+  const [openArchiveModel, setOpenArchiveModel] = useState(false);
+  const handleArchiveModelClose = () => setOpenArchiveModel(false);
+  const handleArchiveModelOpen = () => {
+    setOpenArchiveModel(true);
+    onCatchPageState();
+  }
+
+  const [openRestoreModel, setOpenRestoreModel] = useState(false);
+  const handleRestoreModelClose = () => setOpenRestoreModel(false);
+  const handleRestoreModelOpen = () => {
+    setOpenRestoreModel(true);
+    onCatchPageState();
+  }
 
   return (
     <>
       <div className="border-bottom">
         <Row className="gx-2">
           <Col className="col-auto">
-            <p onClick={handleDetailModelShow}>
+            <p onClick={handleShowModelOpen}>
               {booklet.title}
             </p>
           </Col>
@@ -53,11 +68,11 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={handleDetailModelShow}>View</Dropdown.Item>
-                  <Dropdown.Item onClick={handleEditModelShow}>Edit</Dropdown.Item>
-                  <Dropdown.Item onClick={handleDeleteModelShow} className="text-danger">Delete</Dropdown.Item>
-                  {/* <Dropdown.Item onClick={handleEditModelShow}>Archive</Dropdown.Item>
-                  <Dropdown.Item onClick={handleEditModelShow}>Restore</Dropdown.Item> */}
+                  <Dropdown.Item onClick={handleShowModelOpen}>View</Dropdown.Item>
+                  <Dropdown.Item onClick={handleEditModelOpen}>Edit</Dropdown.Item>
+                  <Dropdown.Item onClick={handleDeleteModelOpen} className="text-danger">Delete</Dropdown.Item>
+                  <Dropdown.Item onClick={handleArchiveModelOpen}>Archive</Dropdown.Item>
+                  <Dropdown.Item onClick={handleRestoreModelOpen}>Restore</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </div>
@@ -67,8 +82,8 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
 
       <Modal
         size="lg"
-        show={showDetailModel}
-        onHide={handleDetailModelClose}
+        show={openShowModal}
+        onHide={handleShowModelClose}
       >
         <Modal.Header closeButton>
           <Modal.Title style={{ fontSize: '14px' }}>Booklet</Modal.Title>
@@ -80,7 +95,7 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
 
       <Modal
         size="lg"
-        show={showEditModel}
+        show={openEditModel}
         onHide={handleEditModelClose}
         backdrop="static"
       >
@@ -94,7 +109,7 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
 
       <Modal
         size="lg"
-        show={showDeleteModel}
+        show={openDeleteModel}
         onHide={handleDeleteModelClose}
         backdrop="static"
       >
@@ -105,8 +120,50 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
           <DeleteBooklet onHide={handleDeleteModelClose} booklet={booklet}></DeleteBooklet>
         </Modal.Body>
       </Modal>
+
+      <Modal
+        size="lg"
+        show={openArchiveModel}
+        onHide={handleArchiveModelClose}
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: '14px' }}>Archive booklet</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ArchiveBooklet onHide={handleArchiveModelClose} booklet={booklet}></ArchiveBooklet>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        size="lg"
+        show={openRestoreModel}
+        onHide={handleRestoreModelClose}
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title style={{ fontSize: '14px' }}>Restore booklet</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <RestoreBooklet onHide={handleRestoreModelClose} booklet={booklet}></RestoreBooklet>
+        </Modal.Body>
+      </Modal>
     </>
   );
 };
 
 export default BookletItem;
+
+const BookletDetail: React.FC<Booklet> = (booklet) => {
+  return (
+    <Row className="row justify-content-center">
+      <Col>
+        <div className="email-detail-content px-4">
+          <div className="text-1000 fs-9 w-100 w-md-75 mb-8">
+            <span style={{ fontSize: '12px' }}> Title: <span style={{ fontSize: '15px' }}> {booklet.title}  </span> </span>
+          </div>
+        </div>
+      </Col>
+    </Row>
+  );
+};

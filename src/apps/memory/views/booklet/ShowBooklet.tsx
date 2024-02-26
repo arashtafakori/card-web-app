@@ -1,8 +1,7 @@
 import { FaAngleLeft } from "react-icons/fa";
-import { Card, Row, Col, Dropdown, Button } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Card, Row, Col, Button } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
 import { BOOKLETS_PATH } from '../../../../paths';
-import { useLocation } from 'react-router-dom';
 // import { useSelector, useDispatch } from "react-redux";
 // import { useEffect } from 'react';
 // import { getBooklet } from '../../redux/booklet/api';
@@ -13,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getBooklet } from "../../redux/booklet/api";
 
-const BookletDetailPage = () => {
+const ShowBooklet = () => {
   const navigate = useNavigate();
 
   const { id } = useParams();
@@ -72,4 +71,4 @@ const BookletDetailPage = () => {
   );
 };
 
-export default BookletDetailPage;
+export default ShowBooklet;

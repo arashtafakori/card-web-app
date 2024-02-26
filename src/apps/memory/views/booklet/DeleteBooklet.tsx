@@ -1,9 +1,8 @@
-import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
+import { Row, Col, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteBooklet } from '../../redux/booklet/api';
-import { notifyError } from '../../redux/booklet/reducers/notificationReducer';
-import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
-import { PaginatedData } from '../../../../utils/paginatedData';
+import { notifyError } from '../../redux/general/reducers/notificationReducer';
+import { httpRequestStatus } from '../../../../utils/httpRequest';
 import { Booklet } from '../../models/booklet';
 
 interface BookletProps {
@@ -25,8 +24,7 @@ const DeleteBooklet = ({ booklet, onHide }: BookletProps) => {
       });
   };
 
-  const httpState = useSelector(
-    (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
+  const httpState = useSelector((state: any) => state.bookletsList);
   const isLoading = httpState.status === httpRequestStatus.Pending
     && httpState.typePrefix === deleteBooklet.typePrefix;
 
@@ -43,7 +41,6 @@ const DeleteBooklet = ({ booklet, onHide }: BookletProps) => {
           </Col>
         </Row>
         <Row className="mb-3">
-
           <Col xs={12} className="gy-6">
             <div className="d-flex justify-content-end gap-3">
               <Button variant="outline-secondary"
