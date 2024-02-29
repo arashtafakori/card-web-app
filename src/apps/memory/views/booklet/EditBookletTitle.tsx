@@ -19,24 +19,20 @@ interface BookletProps {
 }
 
 const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
+  let dispatch = useDispatch<any>();
+
+  const { Formik } = formik;
   const initialFormValues: FormValues = {
     id: booklet.id,
     title: booklet.title
   };
-
-  const { Formik } = formik;
-
   const title_maxLength = 50;
-
   const schema = yup.object().shape({
     title: yup.string()
       .min(3, 'Too Short!')
       .max(title_maxLength, 'Too Long!')
       .required('Required')
   });
-
-  let dispatch = useDispatch<any>();
-
   const handleCreateBooklet = (values: FormValues, approveSubmitting: Function) => {
     dispatch(editBookletTitle(values))
       .unwrap()
@@ -48,7 +44,7 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
         dispatch(notifyError(error));
       });
   };
-
+  //------------
   const httpState = useSelector((state: any) => state.bookletsList);
     const isLoading = httpState.status === httpRequestStatus.Pending
      && httpState.typePrefix === editBookletTitle.typePrefix ;

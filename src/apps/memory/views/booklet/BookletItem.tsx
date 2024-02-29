@@ -10,10 +10,9 @@ import RestoreBooklet from './RestoreBooklet';
 interface BookletProps {
   booklet: Booklet;
   index: number;
-  onCatchPageState: () => void;
 }
 
-const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
+const BookletItem = ({ booklet, index }: BookletProps) => {
   const [openShowModal, setOpenShowModal] = useState(false);
   const handleShowModelClose = () => setOpenShowModal(false);
   const handleShowModelOpen = () => setOpenShowModal(true);
@@ -22,7 +21,6 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
   const handleEditModelClose = () => setOpenEditModel(false);
   const handleEditModelOpen = () => {
     setOpenEditModel(true);
-    onCatchPageState();
   }
 
   const [openDeleteModel, setOpenDeleteModel] = useState(false);
@@ -31,21 +29,18 @@ const BookletItem = ({ booklet, index, onCatchPageState }: BookletProps) => {
   };
   const handleDeleteModelOpen = () => {
     setOpenDeleteModel(true);
-    onCatchPageState();
   };
 
   const [openArchiveModel, setOpenArchiveModel] = useState(false);
   const handleArchiveModelClose = () => setOpenArchiveModel(false);
   const handleArchiveModelOpen = () => {
     setOpenArchiveModel(true);
-    onCatchPageState();
   }
 
   const [openRestoreModel, setOpenRestoreModel] = useState(false);
   const handleRestoreModelClose = () => setOpenRestoreModel(false);
   const handleRestoreModelOpen = () => {
     setOpenRestoreModel(true);
-    onCatchPageState();
   }
 
   return (

@@ -14,12 +14,16 @@ let bookletsListReducer = {
 
 export let bookletsListExtraReducer = (builder: any) => {
   builder.addCase(getBookletsList.pending, (state: any, action: any) => {
-    state.typePrefix =  getTypePrefix(action.type);
+    state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
     .addCase(getBookletsList.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
+      
+      if(action.payload.pageNumber != 1)
+        action.payload.items.unshift(state.data);
+
       state.data = action.payload;
     })
     .addCase(getBookletsList.rejected, (state: any, action: any) => {

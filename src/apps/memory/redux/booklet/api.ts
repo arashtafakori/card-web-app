@@ -6,11 +6,16 @@ let api = axios.create({
   baseURL: process.env.REACT_APP_MEMORY_SERVICE_URL
 });
 
+export interface bookletsListParams {
+  pageNumber: number | null;
+  pageSize: number | null;
+}
+
 export const getBookletsList = createAsyncThunk(
   "booklets/getBookletsList",
-  async (_, thunkAPI: any) => {
+  async (params: bookletsListParams, thunkAPI: any) => {
     try {
-      const response = await api.get(`/v1/Booklets`);
+      const response = await api.get(`/v1.1/Booklets?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`);
       return response.data;
     } catch (error: any) {
       if (error.response) {
