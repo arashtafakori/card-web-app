@@ -1,20 +1,18 @@
 import { Row, Col, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { restoreBooklet } from '../../redux/booklet/api';
+import { deleteBookletPermanently, emptyBookletsTrash } from '../../redux/booklet/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { httpRequestStatus } from '../../../../utils/httpRequest';
-import { Booklet } from '../../models/booklet';
 
-interface BookletProps {
-  booklet: Booklet;
+interface Props {
   onHide: () => void;
 }
 
-const RestoreBooklet = ({ booklet, onHide }: BookletProps) => {
+const EmptyBookletsTrash = ({ onHide }: Props) => {
   let dispatch = useDispatch<any>();
 
   const handleCreateBooklet = () => {
-    dispatch(restoreBooklet(booklet.id))
+    dispatch(emptyBookletsTrash())
       .unwrap()
       .then((data: any) => {
         onHide();
@@ -26,19 +24,13 @@ const RestoreBooklet = ({ booklet, onHide }: BookletProps) => {
 
   const httpState = useSelector((state: any) => state.bookletsList);
   const isLoading = httpState.status === httpRequestStatus.Pending
-    && httpState.typePrefix === restoreBooklet.typePrefix;
+    && httpState.typePrefix === deleteBookletPermanently.typePrefix;
 
   return (
     <Row className="row justify-content-center">
       <Col>
-        <Row>
-          <Col>
-            <div className="email-detail-content px-4">
-              <div className="text-1000 fs-9 w-100 w-md-75 mb-8">
-                <span style={{ fontSize: '12px' }}> Title: <span style={{ fontSize: '15px' }}> {booklet.title}  </span> </span>
-              </div>
-            </div>
-          </Col>
+        <Row className="mb-4">
+          Empty trash? All booklets in Trash will be permanently deleted.
         </Row>
         <Row className="mb-3">
           <Col xs={12} className="gy-6">
@@ -48,14 +40,14 @@ const RestoreBooklet = ({ booklet, onHide }: BookletProps) => {
                 onClick={onHide} size="sm" className="px-5 px-sm-5">
                 Cancel
               </Button>
-              <Button variant="outline-secondary"
+              <Button variant="outline-primary"
                 disabled={isLoading}
                 onClick={handleCreateBooklet} size="sm" className="px-5 px-sm-5">
                 {
                   isLoading &&
                   <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
                 }
-                Restore
+                Empty Trash
               </Button>
             </div>
           </Col>
@@ -65,5 +57,5 @@ const RestoreBooklet = ({ booklet, onHide }: BookletProps) => {
   );
 };
 
-export default RestoreBooklet;
+export default EmptyBookletsTrash;
 

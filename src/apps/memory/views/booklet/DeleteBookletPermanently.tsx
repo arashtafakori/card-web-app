@@ -1,6 +1,6 @@
 import { Row, Col, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteBooklet } from '../../redux/booklet/api';
+import { deleteBookletPermanently } from '../../redux/booklet/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { httpRequestStatus } from '../../../../utils/httpRequest';
 import { Booklet } from '../../models/booklet';
@@ -10,11 +10,11 @@ interface BookletProps {
   onHide: () => void;
 }
 
-const DeleteBooklet = ({ booklet, onHide }: BookletProps) => {
+const DeleteBookletPermanently = ({ booklet, onHide }: BookletProps) => {
   let dispatch = useDispatch<any>();
 
   const handleCreateBooklet = () => {
-    dispatch(deleteBooklet(booklet.id))
+    dispatch(deleteBookletPermanently(booklet.id))
       .unwrap()
       .then((data: any) => {
         onHide();
@@ -26,19 +26,13 @@ const DeleteBooklet = ({ booklet, onHide }: BookletProps) => {
 
   const httpState = useSelector((state: any) => state.bookletsList);
   const isLoading = httpState.status === httpRequestStatus.Pending
-    && httpState.typePrefix === deleteBooklet.typePrefix;
+    && httpState.typePrefix === deleteBookletPermanently.typePrefix;
 
   return (
     <Row className="row justify-content-center">
       <Col>
-        <Row>
-          <Col>
-            <div className="email-detail-content px-4">
-              <div className="text-1000 fs-9 w-100 w-md-75 mb-8">
-                <span style={{ fontSize: '12px' }}> Title: <span style={{ fontSize: '15px' }}> {booklet.title}  </span> </span>
-              </div>
-            </div>
-          </Col>
+        <Row className="mb-4">
+          Delete booklet forever?
         </Row>
         <Row className="mb-3">
           <Col xs={12} className="gy-6">
@@ -48,7 +42,7 @@ const DeleteBooklet = ({ booklet, onHide }: BookletProps) => {
                 onClick={onHide} size="sm" className="px-5 px-sm-5">
                 Cancel
               </Button>
-              <Button variant="outline-danger"
+              <Button variant="outline-primary"
                 disabled={isLoading}
                 onClick={handleCreateBooklet} size="sm" className="px-5 px-sm-5">
                 {
@@ -65,5 +59,5 @@ const DeleteBooklet = ({ booklet, onHide }: BookletProps) => {
   );
 };
 
-export default DeleteBooklet;
+export default DeleteBookletPermanently;
 

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Offcanvas, Container, Nav, Navbar, Button, ButtonGroup } from 'react-bootstrap';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { BOOKLETS_PATH } from '../paths';
-import NotificationToast from './NotificationToast';
 
 function MainLayout() {
   const navigate = useNavigate();
@@ -14,7 +13,6 @@ function MainLayout() {
 
   return (
     <>
-      <NotificationToast />
       <div className="App" style={{ paddingTop: '56px' }}>
         <Navbar expand={false} fixed="top" style={{ width: '60px', zIndex: '1000' }}>
           <Container fluid>

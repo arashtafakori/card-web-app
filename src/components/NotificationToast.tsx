@@ -6,13 +6,16 @@ import { connect, useSelector } from 'react-redux';
 const NotificationToast = () => {
     const [show, setShow] = useState(false);
 
-    const notification = useSelector((state: any) => state.notification);
-
+    const notificationState = useSelector((state: any) => state.notification);
+    
     useEffect(() => {
+        if(notificationState.type == 'CLOSE_NOTIFICATION')
+        setShow(false);
 
-        if (show !== true && notification.message !== '')
+        if (show !== true && notificationState.type == 'SHOW_NOTIFICATION'
+         && notificationState.message !== '')
             setShow(true)
-    }, [notification]);
+    }, [notificationState]);
 
     return (
         <ToastContainer
@@ -24,7 +27,7 @@ const NotificationToast = () => {
                 <Toast.Header>
                     <strong className="mr-auto">Message</strong>
                 </Toast.Header>
-                <Toast.Body>{notification.message}</Toast.Body>
+                <Toast.Body>{notificationState.message}</Toast.Body>
             </Toast>
         </ToastContainer>
 

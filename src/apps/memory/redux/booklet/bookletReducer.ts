@@ -1,11 +1,9 @@
-import { httpRequestStatus } from "../../../../../utils/httpRequest";
-import { getBooklet } from "../api";
+import { createSlice } from "@reduxjs/toolkit";
+import { httpRequestStatus } from "../../../../utils/httpRequest";
+import { getBooklet } from "./api";
+import { initialBooklet } from "../../models/booklet";
 
-let bookletReducer = {
-  get: (state: any, action: any) => {
- 
-  }
-};
+let bookletReducer = {};
 
 export let bookletExtraReducer = (builder: any) => {
   builder.addCase(getBooklet.pending, (state: any, action: any) => {
@@ -25,4 +23,13 @@ export let bookletExtraReducer = (builder: any) => {
   });
 
 };
-export default bookletReducer;
+
+var bookletSlice = createSlice({
+  name: "booklet",
+  initialState: initialBooklet,
+  reducers: bookletReducer,
+  extraReducers: bookletExtraReducer
+});
+
+export default bookletSlice;
+

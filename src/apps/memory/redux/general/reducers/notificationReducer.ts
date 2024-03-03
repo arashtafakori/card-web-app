@@ -5,7 +5,8 @@ export interface Issue {
 
 const issuesToMessage = (issues: Issue[]): string => {
   let message = '';
-  issues.map(((issue: Issue) => { message += '\r\n' + issue.description}));
+  if(issues != undefined)
+    issues.map(((issue: Issue) => { message += '\r\n' + issue.description}));
   return message;
 }
 
@@ -17,9 +18,14 @@ export const notifyError = (error: any) => ({
   type: 'SHOW_NOTIFICATION',
   payload: issuesToMessage(error.issues),
 });
+export const closeNotification = () => ({
+  type: 'CLOSE_NOTIFICATION',
+  payload: null,
+});
 
 const initialState = {
-  message: '',
+  type: '',
+  message: ''
 };
 
 const notificationReducer = (state = initialState, action: any) => {
@@ -27,8 +33,14 @@ const notificationReducer = (state = initialState, action: any) => {
     case 'SHOW_NOTIFICATION':
       return {
         ...state,
+        type: 'SHOW_NOTIFICATION',
         message: action.payload,
       };
+    case 'CLOSE_NOTIFICATION':
+        return {
+          ...state,
+          type: 'CLOSE_NOTIFICATION',
+        };
     default:
       return state;
   }

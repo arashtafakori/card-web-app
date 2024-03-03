@@ -9,13 +9,18 @@ let api = axios.create({
 export interface bookletsListParams {
   pageNumber: number | null;
   pageSize: number | null;
+  isDeleted: boolean | null;
+  searchValue: string | null;
 }
 
 export const getBookletsList = createAsyncThunk(
   "booklets/getBookletsList",
   async (params: bookletsListParams, thunkAPI: any) => {
     try {
-      const response = await api.get(`/v1.1/Booklets?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`);
+ 
+      const url = `/v1.1/booklets?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}&isDeleted=${params.isDeleted}&searchValue=${params.searchValue}`;
+
+      const response = await api.get(url);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -31,7 +36,7 @@ export const getBooklet = createAsyncThunk(
   "booklets/getBooklet",
   async (bookletId: any, thunkAPI) => {
     try {
-      const response = await api.get(`/v1/Booklets/${bookletId}`);
+      const response = await api.get(`/v1/booklets/${bookletId}`);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -48,7 +53,7 @@ export const createNewBooklet = createAsyncThunk(
   async (newBooklet: any, thunkAPI) => {
     try {
       const response = await api.post(
-        `/v1/Booklets`, newBooklet);
+        `/v1/booklets`, newBooklet);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -65,7 +70,7 @@ export const editBookletTitle = createAsyncThunk(
   async (modifiedBooklet: any, thunkAPI) => {
     try {
       const response = await api({
-        url: `/v1/Booklets/EditBookletTitle`,
+        url: `/v1/booklets/editBookletTitle`,
         data: modifiedBooklet,
         method: "PATCH"
       });
@@ -80,12 +85,51 @@ export const editBookletTitle = createAsyncThunk(
   }
 );
 
+
 export const deleteBooklet = createAsyncThunk(
-  "booklets/delete",
+  "booklets/deleteBooklet",
   async (bookletId: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/Booklets/${bookletId}`,
+        url: `/v1/booklets/delete/${bookletId}`,
+        method: "PATCH"
+      });
+      return bookletId;
+    } catch (error: any) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue(networkError);
+      }
+    }
+  }
+);
+
+export const restoreBooklet = createAsyncThunk(
+  "booklets/restoreBooklet",
+  async (bookletId: any, thunkAPI) => {
+    try {
+      await api({
+        url: `/v1/booklets/restore/${bookletId}`,
+        method: "PATCH"
+      });
+      return bookletId;
+    } catch (error: any) {
+      if (error.response) {
+        return thunkAPI.rejectWithValue(error.response.data);
+      } else {
+        return thunkAPI.rejectWithValue(networkError);
+      }
+    }
+  }
+);
+
+export const deleteBookletPermanently = createAsyncThunk(
+  "booklets/deleteBookletPermanently",
+  async (bookletId: any, thunkAPI) => {
+    try {
+      await api({
+        url: `/v1/booklets/${bookletId}`,
         method: "DELETE"
       });
       return bookletId;
@@ -99,53 +143,14 @@ export const deleteBooklet = createAsyncThunk(
   }
 );
 
-export const archiveBooklet = createAsyncThunk(
-  "booklets/archive",
-  async (bookletId: any, thunkAPI) => {
+export const emptyBookletsTrash = createAsyncThunk(
+  "booklets/emptyBookletsTrash",
+  async (_, thunkAPI) => {
     try {
-      const response = await api({
-        url: `/v1/Booklets/archive/${bookletId}`,
-        method: "PATCH"
+      await api({
+        url: `/v1/booklets/emptyTrash`,
+        method: "DELETE"
       });
-      return response.data;
-    } catch (error: any) {
-      if (error.response) {
-        return thunkAPI.rejectWithValue(error.response.data);
-      } else {
-        return thunkAPI.rejectWithValue(networkError);
-      }
-    }
-  }
-);
-
-export const restoreBooklet = createAsyncThunk(
-  "booklets/restore",
-  async (bookletId: any, thunkAPI) => {
-    try {
-      const response = await api({
-        url: `/v1/Booklets/restore/${bookletId}`,
-        method: "PATCH"
-      });
-      return response.data;
-    } catch (error: any) {
-      if (error.response) {
-        return thunkAPI.rejectWithValue(error.response.data);
-      } else {
-        return thunkAPI.rejectWithValue(networkError);
-      }
-    }
-  }
-);
-
-export const checkBookletForArchiving = createAsyncThunk(
-  "booklets/checkItemForArchiving",
-  async (bookletId: any, thunkAPI) => {
-    try {
-      const response = await api({
-        url: `/v1/Booklets/checkItemForArchiving/${bookletId}`,
-        method: "PATCH"
-      });
-      return response.data;
     } catch (error: any) {
       if (error.response) {
         return thunkAPI.rejectWithValue(error.response.data);

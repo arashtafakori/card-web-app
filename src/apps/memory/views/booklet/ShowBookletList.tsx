@@ -1,7 +1,7 @@
 
 import { Form, Row, Col, Modal, Container, Navbar, InputGroup, Stack, Dropdown } from 'react-bootstrap';
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
 import { PaginatedData } from '../../../../utils/paginatedData';
 import { getBookletsList } from '../../redux/booklet/api';
@@ -13,20 +13,27 @@ import { Button } from 'react-bootstrap';
 import { AiOutlineFilter, AiOutlinePlus } from 'react-icons/ai';
 import CreateNewBooklet from './CreateNewBooklet';
 import { PageSpinner } from '../../../../components/PageSpinner';
-import { notifyError } from '../../redux/general/reducers/notificationReducer';
+import { closeNotification, notifyError } from '../../redux/general/reducers/notificationReducer';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import * as formik from 'formik';
-import * as yup from 'yup';
-import { FormikHelpers } from 'formik';
 import { RiFilterFill, RiFilterLine } from "react-icons/ri";
 import './ShowBookletList.css';
-import Search from './Search';
+import { SearchInput, SearchInputRef } from './SearchInput';
+import { IoTrashBinOutline } from "react-icons/io5";
+import EmptyBookletsTrash from './EmptyBookletsTrash';
+import NotificationToast from '../../../../components/NotificationToast';
+import UndoToast from '../../../../components/UndoToast';
+import { closeUndoAction } from '../../redux/general/reducers/undoActionReducer';
+
+enum availabilityStatus {
+  available,
+  deleted
+}
 
 const ShowBookletList = () => {
   let dispatch = useDispatch<any>();
 
   //------------
-  const [containerHeight, setContainerHeight] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(window.innerHeight - 90);
 
   const handleResize = () => {
     setContainerHeight(window.innerHeight - 90);
@@ -41,27 +48,43 @@ const ShowBookletList = () => {
   }, []);
   //---
 
-  const [showNewItemModel, setShowNewItemModel] = useState(false);
+  const [openNewItemModel, setShowNewItemModel] = useState(false);
   const handleNewItemModelClose = () => setShowNewItemModel(false);
   const handleNewItemModelShow = () => {
     setShowNewItemModel(true);
   }
+
+  const [openEmptyTrashModel, setOpenEmptyTrashModel] = useState(false);
+  const handleEmptyTrashModelClose = () => setOpenEmptyTrashModel(false);
+  const handleEmptyTrashModelOpen = () => {
+    setOpenEmptyTrashModel(true);
+  }
   //---
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   // const handleCreateNewBookletClick = () => {
   //   navigate(`${BOOKLETS_CREATE_NEW_PATH}`);
   // };
 
-  const httpState = useSelector(
+  const bookletsListState = useSelector(
     (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
-  const isLoading = httpState.status === httpRequestStatus.Pending
-    && httpState.typePrefix === getBookletsList.typePrefix;
 
-  const fetchData = (pageNumber: number) => {
+  const isLoading = bookletsListState.status === httpRequestStatus.Pending
+    && bookletsListState.typePrefix === getBookletsList.typePrefix;
+
+  const fetchData = (pageNumber: number, status: availabilityStatus, searchValue: string) => {
+    if(pageNumber == 1)
+    {       
+      // It means that the page has been reloaded.
+      dispatch(closeNotification());
+      dispatch(closeUndoAction());
+    }
+
     dispatch(getBookletsList({
       pageNumber: pageNumber,
-      pageSize: pageNumber == 1 ? 10 : 20
+      pageSize: pageNumber == 1 ? 50 : 20,
+      isDeleted: status == availabilityStatus.deleted,
+      searchValue: searchValue
     }))
       .unwrap()
       .then((data: any) => {
@@ -72,16 +95,35 @@ const ShowBookletList = () => {
   }
 
   useEffect(() => {
-    fetchData(1);
+    clearSearchInput();
+    fetchData(1, filterAvailabilityStatus, '');
   }, [dispatch]);
 
-  const [selectedItemId, setSelectedItemId] = useState('available');
+  const [filterAvailabilityStatus, setFilterAvailabilityStatus] = useState(availabilityStatus.available);
 
-  const handleItemClick = (itemId: any) => {
-    setSelectedItemId(itemId);
+  const handleAvailabilityStatusClick = (status: any) => {
+    clearSearchInput();
+    setFilterAvailabilityStatus(status);
+    setSearchValue('');
+    fetchData(1, status, '');
   };
 
- 
+  // make url parametric
+  const [searchValue, setSearchValue] = useState('');
+
+  const search = (value: string) => {
+    setSearchValue(value);
+    fetchData(1, filterAvailabilityStatus, value);
+  };
+
+  const searchInputRef = useRef<SearchInputRef>(null);
+  const clearSearchInput = () => {
+    if (searchInputRef.current) {
+      searchInputRef.current.clear();
+      setSearchValue('');
+      fetchData(1, filterAvailabilityStatus, '');
+    }
+  };
 
   return (
     <>
@@ -89,6 +131,9 @@ const ShowBookletList = () => {
         isLoading &&
         <PageSpinner />
       }
+      
+      <NotificationToast />
+      <UndoToast />
 
       <div>
         <Navbar fixed="top" className="bg-body-tertiary"
@@ -98,40 +143,49 @@ const ShowBookletList = () => {
               <Stack direction="horizontal" gap={2}>
                 <Dropdown>
                   <Dropdown.Toggle variant="outline-primary" id="dropdown-basic">
-                    {selectedItemId === 'available' ? <span className='item-auto-visible'>Show Available Booklets</span> : <span className='item-auto-visible'>Show Removed Items</span>}
+                    {filterAvailabilityStatus === availabilityStatus.available
+                      ? <span className='item-auto-visible'>Available Booklets</span>
+                      : <span className='item-auto-visible'>Deleted Booklets</span>}
                   </Dropdown.Toggle>
 
                   <Dropdown.Menu>
                     <Dropdown.Item
-                      id="available"
-                      active={selectedItemId === 'available'}
-                      onClick={() => handleItemClick('available')}
+                      active={filterAvailabilityStatus === availabilityStatus.available}
+                      onClick={() => handleAvailabilityStatusClick(availabilityStatus.available)}
                     >
                       Available Booklets
                     </Dropdown.Item>
                     <Dropdown.Item
-                      id="removed"
-                      active={selectedItemId === 'removed'}
-                      onClick={() => handleItemClick('removed')}
+                      active={filterAvailabilityStatus === availabilityStatus.deleted}
+                      onClick={() => handleAvailabilityStatusClick(availabilityStatus.deleted)}
                     >
-                      Removed Items
+                      Deleted Booklets
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
 
-                <Button variant="outline-primary" size="sm">
+                {/* <Button variant="outline-primary" size="sm">
                   <RiFilterLine />
-                </Button>
-
- <Search/>
+                </Button> */}
+                <SearchInput ref={searchInputRef} onSearch={(value: string) => { search(value); }} />
               </Stack>
             </div>
             <div className="row">
               <Stack direction="horizontal" gap={2}>
-                <Button variant="outline-primary" size="sm"
-                  onClick={handleNewItemModelShow}>
-                  <AiOutlinePlus /> <span className='item-auto-visible'>New Booklet</span>
-                </Button>
+                {
+                  filterAvailabilityStatus == availabilityStatus.available &&
+                  <Button variant="outline-primary" size="sm"
+                    onClick={handleNewItemModelShow}>
+                    <AiOutlinePlus /> <span className='item-auto-visible'>New Booklet</span>
+                  </Button>
+                }
+                {
+                  filterAvailabilityStatus == availabilityStatus.deleted &&
+                  <Button variant="outline-primary" size="sm"
+                    onClick={handleEmptyTrashModelOpen}>
+                    <IoTrashBinOutline /> <span className='item-auto-visible'>Empty Trash</span>
+                  </Button>
+                }
               </Stack>
             </div>
           </div>
@@ -139,18 +193,22 @@ const ShowBookletList = () => {
 
         <Container fluid>
           <InfiniteScroll
-            dataLength={httpState.data?.items.length!}
-            next={() => { fetchData(httpState.data?.pageNumber! + 1); }}
-            hasMore={httpState.data?.hasNextPage!}
+            dataLength={bookletsListState.data?.items.length!}
+            next={() => { fetchData(bookletsListState.data?.pageNumber! + 1, filterAvailabilityStatus, searchValue); }}
+            hasMore={bookletsListState.data?.hasNextPage!}
             loader={<h4>Loading...</h4>}
             height={containerHeight}
             endMessage={
               <p style={{ textAlign: 'center' }}>
-                <b>All items have been retrieved.</b>
+                {
+                  bookletsListState.data?.numberOfTotalItems == 0
+                    ? 'There is no item to show.'
+                    : 'All items have been retrieved.'
+                }
               </p>
             }
             // below props only if you need pull down functionality
-            refreshFunction={() => { fetchData(1); }}
+            refreshFunction={() => { fetchData(1, filterAvailabilityStatus, searchValue); }}
             pullDownToRefresh
             pullDownToRefreshThreshold={50}
             pullDownToRefreshContent={
@@ -161,17 +219,16 @@ const ShowBookletList = () => {
             }
           >
             {
-              httpState.data?.items.map((booklet, index) => (
+              bookletsListState.data?.items.map((booklet, index) => (
                 <BookletItem index={index} booklet={booklet} key={booklet.id} />))
             }
           </InfiniteScroll>
         </Container>
       </div>
 
-
       <Modal
         size="lg"
-        show={showNewItemModel}
+        show={openNewItemModel}
         onHide={handleNewItemModelClose}
         backdrop="static"
       >
@@ -180,6 +237,16 @@ const ShowBookletList = () => {
         </Modal.Header>
         <Modal.Body>
           <CreateNewBooklet onHide={handleNewItemModelClose}></CreateNewBooklet>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        show={openEmptyTrashModel}
+        onHide={handleEmptyTrashModelClose}
+        backdrop="static"
+      >
+        <Modal.Body className="p-4">
+        <EmptyBookletsTrash onHide={handleEmptyTrashModelClose}></EmptyBookletsTrash>
         </Modal.Body>
       </Modal>
     </>

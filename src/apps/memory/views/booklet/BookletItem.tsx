@@ -1,11 +1,15 @@
-import { Col, Dropdown, Modal, Row } from 'react-bootstrap';
+import { Col, Dropdown, Modal, ProgressBar, Row, Spinner } from 'react-bootstrap';
 import { Booklet } from '../../models/booklet';
-import { CiMenuKebab } from "react-icons/ci";
 import { useState } from 'react';
 import EditBookletTitle from './EditBookletTitle';
-import DeleteBooklet from './DeleteBooklet';
-import ArchiveBooklet from './ArchiveBooklet';
-import RestoreBooklet from './RestoreBooklet';
+import DeleteBookletPermanently from './DeleteBookletPermanently';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteBooklet, restoreBooklet } from '../../redux/booklet/api';
+import { notifyError } from '../../redux/general/reducers/notificationReducer';
+import { showUndoAction, undoItemData } from '../../redux/general/reducers/undoActionReducer';
+import { httpState } from '../../../../utils/httpRequest';
+import { PaginatedData } from '../../../../utils/paginatedData';
+import { undoItem } from '../../redux/booklet/bookletsListReducer';
 
 interface BookletProps {
   booklet: Booklet;
@@ -23,25 +27,65 @@ const BookletItem = ({ booklet, index }: BookletProps) => {
     setOpenEditModel(true);
   }
 
-  const [openDeleteModel, setOpenDeleteModel] = useState(false);
-  const handleDeleteModelClose = () => {
-    setOpenDeleteModel(false);
+  const [openDeletePermanentlyModel, setOpenDeletePermanentlyModel] = useState(false);
+  const handleDeletePermanentlyModelClose = () => {
+    setOpenDeletePermanentlyModel(false);
   };
-  const handleDeleteModelOpen = () => {
-    setOpenDeleteModel(true);
+  const handleDeletePermanentlyModelOpen = () => {
+    setOpenDeletePermanentlyModel(true);
   };
 
-  const [openArchiveModel, setOpenArchiveModel] = useState(false);
-  const handleArchiveModelClose = () => setOpenArchiveModel(false);
-  const handleArchiveModelOpen = () => {
-    setOpenArchiveModel(true);
-  }
+  //
 
-  const [openRestoreModel, setOpenRestoreModel] = useState(false);
-  const handleRestoreModelClose = () => setOpenRestoreModel(false);
-  const handleRestoreModelOpen = () => {
-    setOpenRestoreModel(true);
-  }
+  let dispatch = useDispatch<any>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const bookletsListState = useSelector(
+    (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
+
+  const handleDeleteBooklet = (calledFromUndo: boolean = false) => {
+    setIsLoading(true);
+    dispatch(deleteBooklet(booklet.id))
+      .unwrap()
+      .then((data: any) => {
+        setIsLoading(false);
+
+        if (calledFromUndo === false) {
+          dispatch(showUndoAction({
+            description: 'Booklet deleted.',
+            onUndo: () => { handleRestoreBooklet(true); }
+          }));
+        }else{
+          dispatch(undoItem({index: index, item: booklet} as any));
+        }
+      })
+      .catch((error: any) => {
+        setIsLoading(false);
+        dispatch(notifyError(error));
+      });
+  };
+
+  const handleRestoreBooklet = (calledFromUndo: boolean = false) => {
+    setIsLoading(true);
+    dispatch(restoreBooklet(booklet.id))
+      .unwrap()
+      .then((data: any) => {
+        setIsLoading(false);
+
+        if (calledFromUndo === false) {
+          dispatch(showUndoAction({
+            description: 'Booklet restored.',
+            onUndo: () => { handleDeleteBooklet(true); }
+          }));
+        }else{
+          dispatch(undoItem({index: index, item: booklet} as any));
+        }
+      })
+      .catch((error: any) => {
+        setIsLoading(false);
+        dispatch(notifyError(error));
+      });
+  };
 
   return (
     <>
@@ -58,16 +102,19 @@ const BookletItem = ({ booklet, index }: BookletProps) => {
                 <Dropdown.Toggle
                   variant=" -secondary"
                   className="btn-icon"
+                  disabled={isLoading}
                 >
-                  <CiMenuKebab />
+                  {isLoading && <Spinner animation="border" variant="primary" style={{ width: '15px', height: '15px' }} />}
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
                   <Dropdown.Item onClick={handleShowModelOpen}>View</Dropdown.Item>
-                  <Dropdown.Item onClick={handleEditModelOpen}>Edit</Dropdown.Item>
-                  <Dropdown.Item onClick={handleDeleteModelOpen} className="text-danger">Delete</Dropdown.Item>
-                  <Dropdown.Item onClick={handleArchiveModelOpen}>Archive</Dropdown.Item>
-                  <Dropdown.Item onClick={handleRestoreModelOpen}>Restore</Dropdown.Item>
+
+                  {!booklet.isDeleted && <Dropdown.Item onClick={handleEditModelOpen}>Edit</Dropdown.Item>}
+                  {!booklet.isDeleted && <Dropdown.Item onClick={() => handleDeleteBooklet()}>Delete</Dropdown.Item>}
+
+                  {booklet.isDeleted && <Dropdown.Item onClick={() => handleRestoreBooklet()}>Restore</Dropdown.Item>}
+                  {booklet.isDeleted && <Dropdown.Item onClick={handleDeletePermanentlyModelOpen}>Delete forever</Dropdown.Item>}
                 </Dropdown.Menu>
               </Dropdown>
             </div>
@@ -103,44 +150,12 @@ const BookletItem = ({ booklet, index }: BookletProps) => {
       </Modal>
 
       <Modal
-        size="lg"
-        show={openDeleteModel}
-        onHide={handleDeleteModelClose}
+        show={openDeletePermanentlyModel}
+        onHide={handleDeletePermanentlyModelClose}
         backdrop="static"
       >
-        <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: '14px' }}>Delete booklet</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <DeleteBooklet onHide={handleDeleteModelClose} booklet={booklet}></DeleteBooklet>
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        size="lg"
-        show={openArchiveModel}
-        onHide={handleArchiveModelClose}
-        backdrop="static"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: '14px' }}>Archive booklet</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <ArchiveBooklet onHide={handleArchiveModelClose} booklet={booklet}></ArchiveBooklet>
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        size="lg"
-        show={openRestoreModel}
-        onHide={handleRestoreModelClose}
-        backdrop="static"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: '14px' }}>Restore booklet</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <RestoreBooklet onHide={handleRestoreModelClose} booklet={booklet}></RestoreBooklet>
+        <Modal.Body className="p-4">
+          <DeleteBookletPermanently onHide={handleDeletePermanentlyModelClose} booklet={booklet}></DeleteBookletPermanently>
         </Modal.Body>
       </Modal>
     </>
@@ -162,3 +177,4 @@ const BookletDetail: React.FC<Booklet> = (booklet) => {
     </Row>
   );
 };
+
