@@ -1,35 +1,33 @@
 
-import { Form, Row, Col, Modal, Container, Navbar, InputGroup, Stack, Dropdown } from 'react-bootstrap';
+import { Modal, Container, Navbar, Stack, Dropdown } from 'react-bootstrap';
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from 'react';
 import { httpState, httpRequestStatus } from '../../../../utils/httpRequest';
 import { PaginatedData } from '../../../../utils/paginatedData';
-import { getBookletsList } from '../../redux/booklet/api';
 import "../../redux/store";
-import { Booklet } from '../../models/booklet';
-import BookletItem from './BookletItem';
-import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
-import { AiOutlineFilter, AiOutlinePlus } from 'react-icons/ai';
-import CreateNewBooklet from './CreateNewBooklet';
+import { AiOutlinePlus } from 'react-icons/ai';
 import { PageSpinner } from '../../../../components/PageSpinner';
 import { closeNotification, notifyError } from '../../redux/general/reducers/notificationReducer';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { RiFilterFill, RiFilterLine } from "react-icons/ri";
-import './ShowBookletList.css';
-import { SearchInput, SearchInputRef } from './SearchInput';
+import '../../../../layouts/general.css';
 import { IoTrashBinOutline } from "react-icons/io5";
-import EmptyBookletsTrash from './EmptyBookletsTrash';
+import EmptyIndicesTrash from './EmptyIndicesTrash';
 import NotificationToast from '../../../../components/NotificationToast';
 import UndoToast from '../../../../components/UndoToast';
 import { closeUndoAction } from '../../redux/general/reducers/undoActionReducer';
+import { Index } from '../../models';
+import { getIndicesList } from '../../redux/index/api';
+import { SearchInput, SearchInputRef } from '../../../../components/SearchInput';
+import IndexItem from './IndexItem';
+import AddIndex from './AddIndex';
 
 enum availabilityStatus {
   available,
   deleted
 }
 
-const ShowBookletList = () => {
+const ShowIndicesList = () => {
   let dispatch = useDispatch<any>();
 
   //------------
@@ -61,16 +59,11 @@ const ShowBookletList = () => {
   }
   //---
 
-  // const navigate = useNavigate();
-  // const handleCreateNewBookletClick = () => {
-  //   navigate(`${BOOKLETS_CREATE_NEW_PATH}`);
-  // };
+  const indicesListState = useSelector(
+    (state: any) => state.indicesList as httpState<PaginatedData<Index>>);
 
-  const bookletsListState = useSelector(
-    (state: any) => state.bookletsList as httpState<PaginatedData<Booklet>>);
-
-  const isLoading = bookletsListState.status === httpRequestStatus.Pending
-    && bookletsListState.typePrefix === getBookletsList.typePrefix;
+  const isLoading = indicesListState.status === httpRequestStatus.Pending
+    && indicesListState.typePrefix === getIndicesList.typePrefix;
 
   const fetchData = (pageNumber: number, status: availabilityStatus, searchValue: string) => {
     if(pageNumber == 1)
@@ -80,7 +73,7 @@ const ShowBookletList = () => {
       dispatch(closeUndoAction());
     }
 
-    dispatch(getBookletsList({
+    dispatch(getIndicesList({
       pageNumber: pageNumber,
       pageSize: pageNumber == 1 ? 50 : 20,
       isDeleted: status == availabilityStatus.deleted,
@@ -144,8 +137,8 @@ const ShowBookletList = () => {
                 <Dropdown>
                   <Dropdown.Toggle variant="outline-primary" id="dropdown-basic">
                     {filterAvailabilityStatus === availabilityStatus.available
-                      ? <span className='item-auto-visible'>Available Booklets</span>
-                      : <span className='item-auto-visible'>Deleted Booklets</span>}
+                      ? <span className='item-auto-visible'>Available Indices</span>
+                      : <span className='item-auto-visible'>Deleted Indices</span>}
                   </Dropdown.Toggle>
 
                   <Dropdown.Menu>
@@ -153,13 +146,13 @@ const ShowBookletList = () => {
                       active={filterAvailabilityStatus === availabilityStatus.available}
                       onClick={() => handleAvailabilityStatusClick(availabilityStatus.available)}
                     >
-                      Available Booklets
+                      Available Indices
                     </Dropdown.Item>
                     <Dropdown.Item
                       active={filterAvailabilityStatus === availabilityStatus.deleted}
                       onClick={() => handleAvailabilityStatusClick(availabilityStatus.deleted)}
                     >
-                      Deleted Booklets
+                      Deleted Indices
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
@@ -176,7 +169,7 @@ const ShowBookletList = () => {
                   filterAvailabilityStatus == availabilityStatus.available &&
                   <Button variant="outline-primary" size="sm"
                     onClick={handleNewItemModelShow}>
-                    <AiOutlinePlus /> <span className='item-auto-visible'>New Booklet</span>
+                    <AiOutlinePlus /> <span className='item-auto-visible'>New Index</span>
                   </Button>
                 }
                 {
@@ -193,15 +186,15 @@ const ShowBookletList = () => {
 
         <Container fluid>
           <InfiniteScroll
-            dataLength={bookletsListState.data?.items.length!}
-            next={() => { fetchData(bookletsListState.data?.pageNumber! + 1, filterAvailabilityStatus, searchValue); }}
-            hasMore={bookletsListState.data?.hasNextPage!}
+            dataLength={indicesListState.data?.items.length!}
+            next={() => { fetchData(indicesListState.data?.pageNumber! + 1, filterAvailabilityStatus, searchValue); }}
+            hasMore={indicesListState.data?.hasNextPage!}
             loader={<h4>Loading...</h4>}
             height={containerHeight}
             endMessage={
               <p style={{ textAlign: 'center' }}>
                 {
-                  bookletsListState.data?.numberOfTotalItems == 0
+                  indicesListState.data?.numberOfTotalItems == 0
                     ? 'There is no item to show.'
                     : 'All items have been retrieved.'
                 }
@@ -219,8 +212,8 @@ const ShowBookletList = () => {
             }
           >
             {
-              bookletsListState.data?.items.map((booklet, index) => (
-                <BookletItem index={index} booklet={booklet} key={booklet.id} />))
+              indicesListState.data?.items.map((index, itemIndex) => (
+                <IndexItem itemIndex={itemIndex} index={index} key={index.id} />))
             }
           </InfiniteScroll>
         </Container>
@@ -236,7 +229,7 @@ const ShowBookletList = () => {
           <Modal.Title style={{ fontSize: '14px' }}>Create new booklet</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <CreateNewBooklet onHide={handleNewItemModelClose}></CreateNewBooklet>
+          <AddIndex onHide={handleNewItemModelClose}></AddIndex>
         </Modal.Body>
       </Modal>
 
@@ -246,11 +239,11 @@ const ShowBookletList = () => {
         backdrop="static"
       >
         <Modal.Body className="p-4">
-        <EmptyBookletsTrash onHide={handleEmptyTrashModelClose}></EmptyBookletsTrash>
+        <EmptyIndicesTrash onHide={handleEmptyTrashModelClose}></EmptyIndicesTrash>
         </Modal.Body>
       </Modal>
     </>
   );
 };
 
-export default ShowBookletList;
+export default ShowIndicesList;

@@ -4,7 +4,7 @@ import { RouteObject, createBrowserRouter } from 'react-router-dom';
 import ErrorPage from './pages/ErrorPage';
 import App from './App';
 import { BOOKLETS_PATH } from './paths';
-import ShowBookletList from './apps/memory/views/booklet/ShowBookletList';
+import ShowBookletsList from './apps/memory/views/booklet/ShowBookletsList';
 import ShowBooklet from './apps/memory/views/booklet/ShowBooklet';
 
 const routes: RouteObject[] = [
@@ -25,7 +25,7 @@ const routes: RouteObject[] = [
               {
                 path: BOOKLETS_PATH,
                 index: true,
-                element: <ShowBookletList />
+                element: <ShowBookletsList />
               },
               {
                 path: BOOKLETS_PATH + "/:id",

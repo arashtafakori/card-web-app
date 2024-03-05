@@ -3,7 +3,7 @@ import * as formik from 'formik';
 import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { createNewBooklet } from '../../redux/booklet/api';
+import { createBooklet } from '../../redux/booklet/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { httpRequestStatus } from '../../../../utils/httpRequest';;
 
@@ -11,7 +11,7 @@ interface FormValues {
   title: string;
 }
 
-const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
+const CreateBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
   const initialFormValues: FormValues = {
     title: ''
   };
@@ -29,7 +29,7 @@ const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
   let dispatch = useDispatch<any>();
 
   const handleCreateBooklet = (values: FormValues, approveSubmitting: Function) => {
-    dispatch(createNewBooklet(values))
+    dispatch(createBooklet(values))
       .unwrap()
       .then((data: any) => {
         approveSubmitting();
@@ -42,7 +42,7 @@ const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
 
   const httpState = useSelector((state: any) => state.bookletsList);
   const isLoading = httpState.status === httpRequestStatus.Pending 
-  && httpState.typePrefix === createNewBooklet.typePrefix ;
+  && httpState.typePrefix === createBooklet.typePrefix ;
 
   return (
     <Row className="row justify-content-center">
@@ -114,5 +114,5 @@ const CreateNewBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
   );
 };
 
-export default CreateNewBooklet;
+export default CreateBooklet;
 

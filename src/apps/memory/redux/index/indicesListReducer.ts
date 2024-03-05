@@ -1,23 +1,20 @@
-import {
-  getBookletsList, createBooklet,
-  editBookletTitle, deleteBookletPermanently, deleteBooklet, restoreBooklet, emptyBookletsTrash
-} from "./api";
+import {createIndex, deleteIndex, deleteIndexPermanently, editIndexName, emptyIndicesTrash, getIndicesList, restoreIndex} from "./api";
 import { ModelState, getStatus, getTypePrefix } from "../../../../utils/httpRequest";
-import { Booklet } from "../../models/booklet";
+import { Index } from "../../models";
 import { createSlice } from "@reduxjs/toolkit";
  
-let bookletsListReducer = {
+let indicesListReducer = {
   undoItem: (state: any, action: any) => {
     state.data.items.splice(action.payload.index, 0, action.payload.item);
   }
 };
 
-export let bookletsListExtraReducer = (builder: any) => {
-  builder.addCase(getBookletsList.pending, (state: any, action: any) => {
+export let indicesListExtraReducer = (builder: any) => {
+  builder.addCase(getIndicesList.pending, (state: any, action: any) => {
     state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(getBookletsList.fulfilled, (state: any, action: any) => {
+    .addCase(getIndicesList.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       
@@ -26,7 +23,7 @@ export let bookletsListExtraReducer = (builder: any) => {
 
       state.data = action.payload;
     })
-    .addCase(getBookletsList.rejected, (state: any, action: any) => {
+    .addCase(getIndicesList.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -34,16 +31,16 @@ export let bookletsListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(createBooklet.pending, (state: any, action: any) => {
+  builder.addCase(createIndex.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(createBooklet.fulfilled, (state: any, action: any) => {
+    .addCase(createIndex.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.data.items.unshift(action.payload);
     })
-    .addCase(createBooklet.rejected, (state: any, action: any) => {
+    .addCase(createIndex.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.payload;
@@ -51,11 +48,11 @@ export let bookletsListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(editBookletTitle.pending, (state: any, action: any) => {
+  builder.addCase(editIndexName.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(editBookletTitle.fulfilled, (state: any, action: any) => {
+    .addCase(editIndexName.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const updatedItem = action.payload;
@@ -63,7 +60,7 @@ export let bookletsListExtraReducer = (builder: any) => {
         (item: any) => item.id === updatedItem.id);
       if (index !== -1) state.data.items[index] = updatedItem;
     })
-    .addCase(editBookletTitle.rejected, (state: any, action: any) => {
+    .addCase(editIndexName.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -71,11 +68,11 @@ export let bookletsListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(deleteBooklet.pending, (state: any, action: any) => {
+  builder.addCase(deleteIndex.pending, (state: any, action: any) => {
     state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(deleteBooklet.fulfilled, (state: any, action: any) => {
+    .addCase(deleteIndex.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const deletedtItemId = action.payload;
@@ -84,7 +81,7 @@ export let bookletsListExtraReducer = (builder: any) => {
       if (index !== -1)
         state.data.items.splice(index, 1);
     })
-    .addCase(deleteBooklet.rejected, (state: any, action: any) => {
+    .addCase(deleteIndex.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -92,11 +89,11 @@ export let bookletsListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(restoreBooklet.pending, (state: any, action: any) => {
+  builder.addCase(restoreIndex.pending, (state: any, action: any) => {
     state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(restoreBooklet.fulfilled, (state: any, action: any) => {
+    .addCase(restoreIndex.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const restoredItemId = action.payload;
@@ -105,7 +102,7 @@ export let bookletsListExtraReducer = (builder: any) => {
       if (index !== -1)
         state.data.items.splice(index, 1);
     })
-    .addCase(restoreBooklet.rejected, (state: any, action: any) => {
+    .addCase(restoreIndex.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -113,11 +110,11 @@ export let bookletsListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(deleteBookletPermanently.pending, (state: any, action: any) => {
+  builder.addCase(deleteIndexPermanently.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(deleteBookletPermanently.fulfilled, (state: any, action: any) => {
+    .addCase(deleteIndexPermanently.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const deletedtItemId = action.payload;
@@ -126,7 +123,7 @@ export let bookletsListExtraReducer = (builder: any) => {
       if (index !== -1)
         state.data.items.splice(index, 1);
     })
-    .addCase(deleteBookletPermanently.rejected, (state: any, action: any) => {
+    .addCase(deleteIndexPermanently.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -134,17 +131,17 @@ export let bookletsListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(emptyBookletsTrash.pending, (state: any, action: any) => {
+  builder.addCase(emptyIndicesTrash.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(emptyBookletsTrash.fulfilled, (state: any, action: any) => {
+    .addCase(emptyIndicesTrash.fulfilled, (state: any, action: any) => {
  
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
-      state.data = (ModelState.initiatePaginatedData<Booklet>()).data;
+      state.data = (ModelState.initiatePaginatedData<Index>()).data;
     })
-    .addCase(emptyBookletsTrash.rejected, (state: any, action: any) => {
+    .addCase(emptyIndicesTrash.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -152,12 +149,12 @@ export let bookletsListExtraReducer = (builder: any) => {
 };
  
 
-var bookletsListSlice = createSlice({
-  name: "booklets-list",
-  initialState: ModelState.initiatePaginatedData<Booklet>(),
-  reducers: bookletsListReducer,
-  extraReducers: bookletsListExtraReducer
+var indicesListSlice = createSlice({
+  name: "indices-list",
+  initialState: ModelState.initiatePaginatedData<Index>(),
+  reducers: indicesListReducer,
+  extraReducers: indicesListExtraReducer
 });
 
-export default bookletsListSlice;
-export const { undoItem } = bookletsListSlice.actions;
+export default indicesListSlice;
+export const { undoItem } = indicesListSlice.actions;

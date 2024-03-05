@@ -6,19 +6,18 @@ let api = axios.create({
   baseURL: process.env.REACT_APP_MEMORY_SERVICE_URL
 });
 
-export interface bookletsListParams {
+export interface indicesListParams {
   pageNumber: number | null;
   pageSize: number | null;
   isDeleted: boolean | null;
   searchValue: string | null;
 }
 
-export const getBookletsList = createAsyncThunk(
-  "booklets/getBookletsList",
-  async (params: bookletsListParams, thunkAPI: any) => {
+export const getIndicesList = createAsyncThunk(
+  "indices/getIndicesList",
+  async (params: indicesListParams, thunkAPI: any) => {
     try {
- 
-      const url = `/v1.1/booklets?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}&isDeleted=${params.isDeleted}&searchValue=${params.searchValue}`;
+      const url = `/v1/indices?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}&isDeleted=${params.isDeleted}&searchValue=${params.searchValue}`;
 
       const response = await api.get(url);
       return response.data;
@@ -32,11 +31,11 @@ export const getBookletsList = createAsyncThunk(
   }
 );
 
-export const getBooklet = createAsyncThunk(
-  "booklets/getBooklet",
+export const getIndex = createAsyncThunk(
+  "indices/getIndex",
   async (id: any, thunkAPI) => {
     try {
-      const response = await api.get(`/v1/booklets/${id}`);
+      const response = await api.get(`/v1/indices/${id}`);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -48,12 +47,13 @@ export const getBooklet = createAsyncThunk(
   }
 );
 
-export const createBooklet = createAsyncThunk(
-  "booklets/createBooklet",
+
+export const createIndex = createAsyncThunk(
+  "indices/createIndex",
   async (newBooklet: any, thunkAPI) => {
     try {
       const response = await api.post(
-        `/v1/booklets`, newBooklet);
+        `/v1/indices`, newBooklet);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -65,12 +65,12 @@ export const createBooklet = createAsyncThunk(
   }
 );
 
-export const editBookletTitle = createAsyncThunk(
-  "booklets/editBookletTitle",
+export const editIndexName = createAsyncThunk(
+  "indices/editIndexName",
   async (modifiedItem: any, thunkAPI) => {
     try {
       const response = await api({
-        url: `/v1/booklets/editBookletTitle`,
+        url: `/v1/indices/editIndexName`,
         data: modifiedItem,
         method: "PATCH"
       });
@@ -86,12 +86,12 @@ export const editBookletTitle = createAsyncThunk(
 );
 
 
-export const deleteBooklet = createAsyncThunk(
-  "booklets/deleteBooklet",
+export const deleteIndex = createAsyncThunk(
+  "indices/deleteIndex",
   async (id: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/booklets/delete/${id}`,
+        url: `/v1/indices/delete/${id}`,
         method: "PATCH"
       });
       return id;
@@ -105,12 +105,12 @@ export const deleteBooklet = createAsyncThunk(
   }
 );
 
-export const restoreBooklet = createAsyncThunk(
-  "booklets/restoreBooklet",
+export const restoreIndex = createAsyncThunk(
+  "indices/restoreIndex",
   async (id: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/booklets/restore/${id}`,
+        url: `/v1/indices/restore/${id}`,
         method: "PATCH"
       });
       return id;
@@ -124,12 +124,12 @@ export const restoreBooklet = createAsyncThunk(
   }
 );
 
-export const deleteBookletPermanently = createAsyncThunk(
-  "booklets/deleteBookletPermanently",
+export const deleteIndexPermanently = createAsyncThunk(
+  "indices/deleteIndexPermanently",
   async (id: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/booklets/${id}`,
+        url: `/v1/indices/${id}`,
         method: "DELETE"
       });
       return id;
@@ -143,12 +143,12 @@ export const deleteBookletPermanently = createAsyncThunk(
   }
 );
 
-export const emptyBookletsTrash = createAsyncThunk(
-  "booklets/emptyBookletsTrash",
+export const emptyIndicesTrash = createAsyncThunk(
+  "indices/emptyIndicesTrash",
   async (_, thunkAPI) => {
     try {
       await api({
-        url: `/v1/booklets/emptyTrash`,
+        url: `/v1/indices/emptyTrash`,
         method: "DELETE"
       });
     } catch (error: any) {

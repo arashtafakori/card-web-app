@@ -18,9 +18,9 @@ const UndoToast = () => {
     }, [undoActionState]);
 
     const handleUndoClick = () => {
-        if (undoActionState.onUndo != null)
+        if (undoActionState.payload && undoActionState.payload.onUndo != null)
         {
-            undoActionState.onUndo();
+            undoActionState.payload.onUndo();
             setShow(false);
         }
     };
@@ -36,7 +36,7 @@ const UndoToast = () => {
                     <div className="container-fluid">
                         <Row>
                             <Col xs={8}>
-                                <span style={{ fontWeight: 'bold' }}>{undoActionState.payload.description}</span>
+                                {undoActionState.payload && <span style={{ fontWeight: 'bold' }}>{undoActionState.payload.description}</span>}
                             </Col>
 
                             <Col className="d-flex justify-content-end">
