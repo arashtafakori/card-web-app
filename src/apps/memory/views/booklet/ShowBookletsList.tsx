@@ -206,15 +206,15 @@ const ShowBookletsList = () => {
               </p>
             }
             // below props only if you need pull down functionality
-            refreshFunction={() => { fetchData(1, filterAvailabilityStatus, searchValue); }}
-            pullDownToRefresh
-            pullDownToRefreshThreshold={50}
-            pullDownToRefreshContent={
-              <h3 style={{ textAlign: 'center' }}>Pull down to refresh</h3>
-            }
-            releaseToRefreshContent={
-              <h3 style={{ textAlign: 'center' }}>Release to refresh</h3>
-            }
+            // refreshFunction={() => { fetchData(1, filterAvailabilityStatus, searchValue); }}
+            // pullDownToRefresh
+            // pullDownToRefreshThreshold={50}
+            // pullDownToRefreshContent={
+            //   <h3 style={{ textAlign: 'center' }}>Pull down to refresh</h3>
+            // }
+            // releaseToRefreshContent={
+            //   <h3 style={{ textAlign: 'center' }}>Release to refresh</h3>
+            // }
           >
             {
               bookletsListState.data?.items.map((booklet, itemIndex) => (

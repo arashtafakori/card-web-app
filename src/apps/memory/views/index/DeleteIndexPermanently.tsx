@@ -13,7 +13,7 @@ interface BoIndexProps {
 const DeleteIndexPermanently = ({ index, onHide }: BoIndexProps) => {
   let dispatch = useDispatch<any>();
 
-  const handleCreateIndex = () => {
+  const handleDeletingPermanently = () => {
     dispatch(deleteIndexPermanently(index.id))
       .unwrap()
       .then((data: any) => {
@@ -44,7 +44,7 @@ const DeleteIndexPermanently = ({ index, onHide }: BoIndexProps) => {
               </Button>
               <Button variant="outline-primary"
                 disabled={isLoading}
-                onClick={handleCreateIndex} size="sm" className="px-5 px-sm-5">
+                onClick={handleDeletingPermanently} size="sm" className="px-5 px-sm-5">
                 {
                   isLoading &&
                   <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>

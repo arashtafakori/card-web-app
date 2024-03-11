@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Offcanvas, Container, Nav, Navbar, Button, ButtonGroup } from 'react-bootstrap';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { BOOKLETS_PATH } from '../paths';
+import { BOOKLETS_PATH } from '../route/paths';
 
 function MainLayout() {
   const navigate = useNavigate();

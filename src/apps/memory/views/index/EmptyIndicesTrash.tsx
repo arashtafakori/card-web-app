@@ -5,14 +5,15 @@ import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { httpRequestStatus } from '../../../../utils/httpRequest';
 
 interface Props {
+  bookletId: any;
   onHide: () => void;
 }
 
-const EmptyIndicesTrash = ({ onHide }: Props) => {
+const EmptyIndicesTrash = ({ bookletId, onHide }: Props) => {
   let dispatch = useDispatch<any>();
 
-  const handleCreateIndex = () => {
-    dispatch(emptyIndicesTrash())
+  const handleMakingEmptyTrash = () => {
+    dispatch(emptyIndicesTrash(bookletId))
       .unwrap()
       .then((data: any) => {
         onHide();
@@ -42,7 +43,7 @@ const EmptyIndicesTrash = ({ onHide }: Props) => {
               </Button>
               <Button variant="outline-primary"
                 disabled={isLoading}
-                onClick={handleCreateIndex} size="sm" className="px-5 px-sm-5">
+                onClick={handleMakingEmptyTrash} size="sm" className="px-5 px-sm-5">
                 {
                   isLoading &&
                   <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>

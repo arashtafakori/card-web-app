@@ -3,24 +3,26 @@ import * as formik from 'formik';
 import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { createIndex } from '../../redux/index/api';
+import { addIndex } from '../../redux/index/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { httpRequestStatus } from '../../../../utils/httpRequest';;
 
 interface FormValues {
-  title: string;
+  bookletId: string;
+  name: string;
 }
 
-const AddIndex: React.FC<{ onHide: () => void }> = ({ onHide }) => {
+const AddIndex: React.FC<{ onHide: () => void, bookletId:any}> = ({ onHide, bookletId}) => {
   const initialFormValues: FormValues = {
-    title: ''
+    bookletId: bookletId,
+    name: ''
   };
 
   const { Formik } = formik;
   const title_maxLength = 50;
 
   const schema = yup.object().shape({
-    title: yup.string()
+    name: yup.string()
       .min(3, 'Too Short!')
       .max(title_maxLength, 'Too Long!')
       .required('Required')
@@ -28,8 +30,8 @@ const AddIndex: React.FC<{ onHide: () => void }> = ({ onHide }) => {
 
   let dispatch = useDispatch<any>();
 
-  const handleCreateIndex = (values: FormValues, approveSubmitting: Function) => {
-    dispatch(createIndex(values))
+  const handleAdding = (values: FormValues, approveSubmitting: Function) => {
+    dispatch(addIndex(values))
       .unwrap()
       .then((data: any) => {
         approveSubmitting();
@@ -42,7 +44,7 @@ const AddIndex: React.FC<{ onHide: () => void }> = ({ onHide }) => {
 
   const httpState = useSelector((state: any) => state.indicesList);
   const isLoading = httpState.status === httpRequestStatus.Pending 
-  && httpState.typePrefix === createIndex.typePrefix ;
+  && httpState.typePrefix === addIndex.typePrefix ;
 
   return (
     <Row className="row justify-content-center">
@@ -53,7 +55,7 @@ const AddIndex: React.FC<{ onHide: () => void }> = ({ onHide }) => {
             values: FormValues,
             { setSubmitting }: FormikHelpers<FormValues>
           ) => {
-            handleCreateIndex(values,
+            handleAdding(values,
               () => {
                 setSubmitting(false);
               }
@@ -66,20 +68,20 @@ const AddIndex: React.FC<{ onHide: () => void }> = ({ onHide }) => {
               <Row className="mb-3">
                 <Col>
                   <Form.Group as={Col} controlId="validationFormik01">
-                    <Form.Label>Title</Form.Label>
+                    <Form.Label>Name</Form.Label>
                     <InputGroup hasValidation>
                       <Form.Control
                         type="text"
-                        name="title"
+                        name="name"
                         placeholder=""
-                        value={values.title}
+                        value={values.name}
                         onChange={handleChange}
-                        isInvalid={!!errors.title}
-                        isValid={touched.title && !errors.title}
+                        isInvalid={!!errors.name}
+                        isValid={touched.name && !errors.name}
                         maxLength={title_maxLength}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.title}
+                        {errors.name}
                       </Form.Control.Feedback>
                     </InputGroup>
                   </Form.Group>

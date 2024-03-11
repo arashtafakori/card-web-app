@@ -11,7 +11,7 @@ interface Props {
 const EmptyBookletsTrash = ({ onHide }: Props) => {
   let dispatch = useDispatch<any>();
 
-  const handleCreateBooklet = () => {
+  const handleMakingEmptyTrash = () => {
     dispatch(emptyBookletsTrash())
       .unwrap()
       .then((data: any) => {
@@ -42,7 +42,7 @@ const EmptyBookletsTrash = ({ onHide }: Props) => {
               </Button>
               <Button variant="outline-primary"
                 disabled={isLoading}
-                onClick={handleCreateBooklet} size="sm" className="px-5 px-sm-5">
+                onClick={handleMakingEmptyTrash} size="sm" className="px-5 px-sm-5">
                 {
                   isLoading &&
                   <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>

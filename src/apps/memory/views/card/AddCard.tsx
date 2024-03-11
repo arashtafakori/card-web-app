@@ -3,33 +3,53 @@ import * as formik from 'formik';
 import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { createBooklet } from '../../redux/booklet/api';
+import { addCard } from '../../redux/card/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { httpRequestStatus } from '../../../../utils/httpRequest';;
 
 interface FormValues {
-  title: string;
+  bookletId: string | undefined;
+  indexId: string | undefined| null;
+  expression: string;
+  expressionLanguage: string;
+  translation: string | null;
+  translationLanguage: string | null;
 }
 
-const CreateBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
+interface CardProps {
+  bookletId: string | undefined;
+  indexId: string | undefined| null;
+  onHide: () => void;
+}
+
+const AddCard= ({ bookletId, indexId, onHide }: CardProps) => {
   const initialFormValues: FormValues = {
-    title: ''
+    bookletId: bookletId,
+    indexId: indexId,
+    expression: '',
+    expressionLanguage: 'de',
+    translation: '',
+    translationLanguage: 'en'
   };
 
   const { Formik } = formik;
-  const title_maxLength = 50;
+  const expression_maxLength = 1024;
+  const translation_maxLength = 1024;
 
   const schema = yup.object().shape({
-    title: yup.string()
-      .min(3, 'Too Short!')
-      .max(title_maxLength, 'Too Long!')
-      .required('Required')
+    expression: yup.string()
+      .min(1, 'Too Short!')
+      .max(expression_maxLength, 'Too Long!')
+      .required('Required'),
+       translation: yup.string()
+      .min(1, 'Too Short!')
+      .max(translation_maxLength, 'Too Long!')
   });
 
   let dispatch = useDispatch<any>();
 
-  const handleCreating = (values: FormValues, approveSubmitting: Function) => {
-    dispatch(createBooklet(values))
+  const handleAdding = (values: FormValues, approveSubmitting: Function) => {
+    dispatch(addCard(values))
       .unwrap()
       .then((data: any) => {
         approveSubmitting();
@@ -40,9 +60,9 @@ const CreateBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
       });
   };
 
-  const httpState = useSelector((state: any) => state.bookletsList);
+  const httpState = useSelector((state: any) => state.cardsList);
   const isLoading = httpState.status === httpRequestStatus.Pending 
-  && httpState.typePrefix === createBooklet.typePrefix ;
+  && httpState.typePrefix === addCard.typePrefix ;
 
   return (
     <Row className="row justify-content-center">
@@ -53,7 +73,7 @@ const CreateBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
             values: FormValues,
             { setSubmitting }: FormikHelpers<FormValues>
           ) => {
-            handleCreating(values,
+            handleAdding(values,
               () => {
                 setSubmitting(false);
               }
@@ -66,20 +86,43 @@ const CreateBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
               <Row className="mb-3">
                 <Col>
                   <Form.Group as={Col} controlId="validationFormik01">
-                    <Form.Label>Title</Form.Label>
+                    <Form.Label>Expression</Form.Label>
                     <InputGroup hasValidation>
                       <Form.Control
                         type="text"
-                        name="title"
+                        name="expression"
                         placeholder=""
-                        value={values.title}
+                        value={values.expression}
                         onChange={handleChange}
-                        isInvalid={!!errors.title}
-                        isValid={touched.title && !errors.title}
-                        maxLength={title_maxLength}
+                        isInvalid={!!errors.expression}
+                        isValid={touched.expression && !errors.expression}
+                        maxLength={expression_maxLength}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.title}
+                        {errors.expression}
+                      </Form.Control.Feedback>
+                    </InputGroup>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col>
+                  <Form.Group as={Col} controlId="validationFormik01">
+                    <Form.Label>Translation</Form.Label>
+                    <InputGroup hasValidation>
+                      <Form.Control
+                        type="text"
+                        name="translation"
+                        placeholder=""
+                        value={values.translation!}
+                        onChange={handleChange}
+                        isInvalid={!!errors.translation}
+                        isValid={touched.translation && !errors.translation}
+                        maxLength={translation_maxLength}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.translation}
                       </Form.Control.Feedback>
                     </InputGroup>
                   </Form.Group>
@@ -114,5 +157,5 @@ const CreateBooklet: React.FC<{ onHide: () => void }> = ({ onHide }) => {
   );
 };
 
-export default CreateBooklet;
+export default AddCard;
 

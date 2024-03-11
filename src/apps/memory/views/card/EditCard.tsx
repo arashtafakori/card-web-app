@@ -3,38 +3,54 @@ import * as formik from 'formik';
 import * as yup from 'yup';
 import { FormikHelpers } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { editBookletTitle } from '../../redux/booklet/api';
+import { editCard } from '../../redux/card/api';
 import { httpRequestStatus } from '../../../../utils/httpRequest';
-import { Booklet } from '../../models/booklet';
+import { Card } from '../../models/card';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 
 interface FormValues {
   id: string;
-  title: string;
+  bookletId: string;
+  indexId: string | null;
+  expression: string;
+  expressionLanguage: string;
+  translation: string | null;
+  translationLanguage: string | null;
 }
 
-interface BookletProps {
-  booklet: Booklet;
+interface CardProps {
+  card: Card;
   onHide: () => void;
 }
 
-const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
+const EditCard = ({ card, onHide }: CardProps) => {
   let dispatch = useDispatch<any>();
 
   const { Formik } = formik;
   const initialFormValues: FormValues = {
-    id: booklet.id,
-    title: booklet.title
+    id: card.id,
+    bookletId: card.bookletId,
+    indexId: card.indexId,
+    expression: card.expression,
+    expressionLanguage: card.expressionLanguage,
+    translation: card.translation,
+    translationLanguage: card.translationLanguage
   };
-  const title_maxLength = 50;
+  
+  const expression_maxLength = 1024;
+  const translation_maxLength = 1024;
+
   const schema = yup.object().shape({
-    title: yup.string()
-      .min(3, 'Too Short!')
-      .max(title_maxLength, 'Too Long!')
-      .required('Required')
+    expression: yup.string()
+      .min(1, 'Too Short!')
+      .max(expression_maxLength, 'Too Long!')
+      .required('Required'),
+       translation: yup.string()
+      .min(1, 'Too Short!')
+      .max(translation_maxLength, 'Too Long!')
   });
   const handleEditing = (values: FormValues, approveSubmitting: Function) => {
-    dispatch(editBookletTitle(values))
+    dispatch(editCard(values))
       .unwrap()
       .then((data: any) => {
         approveSubmitting();
@@ -45,9 +61,9 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
       });
   };
   //------------
-  const httpState = useSelector((state: any) => state.bookletsList);
+  const httpState = useSelector((state: any) => state.cardsList);
     const isLoading = httpState.status === httpRequestStatus.Pending
-     && httpState.typePrefix === editBookletTitle.typePrefix ;
+     && httpState.typePrefix === editCard.typePrefix ;
 
   return (
     <Row className="row justify-content-center">
@@ -71,20 +87,43 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
               <Row className="mb-3">
                 <Col>
                   <Form.Group as={Col} controlId="validationFormik01">
-                    <Form.Label>Title</Form.Label>
+                    <Form.Label>Expression</Form.Label>
                     <InputGroup hasValidation>
                       <Form.Control
                         type="text"
-                        name="title"
+                        name="expression"
                         placeholder=""
-                        value={values.title}
+                        value={values.expression}
                         onChange={handleChange}
-                        isInvalid={!!errors.title}
-                        isValid={touched.title && !errors.title}
-                        maxLength={title_maxLength}
+                        isInvalid={!!errors.expression}
+                        isValid={touched.expression && !errors.expression}
+                        maxLength={expression_maxLength}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.title}
+                        {errors.expression}
+                      </Form.Control.Feedback>
+                    </InputGroup>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col>
+                  <Form.Group as={Col} controlId="validationFormik01">
+                    <Form.Label>Expression</Form.Label>
+                    <InputGroup hasValidation>
+                      <Form.Control
+                        type="text"
+                        name="translation"
+                        placeholder=""
+                        value={values.translation!}
+                        onChange={handleChange}
+                        isInvalid={!!errors.translation}
+                        isValid={touched.translation && !errors.translation}
+                        maxLength={translation_maxLength}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.translation}
                       </Form.Control.Feedback>
                     </InputGroup>
                   </Form.Group>
@@ -119,5 +158,5 @@ const EditBookletTitle = ({ booklet, onHide }: BookletProps) => {
   );
 };
 
-export default EditBookletTitle;
+export default EditCard;
 

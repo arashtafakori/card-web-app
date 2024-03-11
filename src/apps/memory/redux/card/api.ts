@@ -6,16 +6,21 @@ let api = axios.create({
   baseURL: process.env.REACT_APP_MEMORY_SERVICE_URL
 });
 
-export interface indicesListParams {
-  bookletId: string;
+export interface cardsListParams {
+  bookletId: string | undefined;
+  indexId: string | null | undefined;
+  pageNumber: number | null;
+  pageSize: number | null;
   isDeleted: boolean | null;
+  searchValue: string | null;
 }
 
-export const getIndicesList = createAsyncThunk(
-  "indices/getIndicesList",
-  async (params: indicesListParams, thunkAPI: any) => {
+export const getCardsList = createAsyncThunk(
+  "cards/getCardsList",
+  async (params: cardsListParams, thunkAPI: any) => {
     try {
-      const url = `/v1/Booklets/${params.bookletId}/Indices?isDeleted=${params.isDeleted}`;
+ 
+      const url = `/v1/cards?bookletId=${params.bookletId}&indexId=${params.indexId}&pageNumber=${params.pageNumber}&pageSize=${params.pageSize}&isDeleted=${params.isDeleted}&searchValue=${params.searchValue}`;
 
       const response = await api.get(url);
       return response.data;
@@ -29,11 +34,11 @@ export const getIndicesList = createAsyncThunk(
   }
 );
 
-export const getIndex = createAsyncThunk(
-  "indices/getIndex",
+export const getCard = createAsyncThunk(
+  "cards/getCard",
   async (id: any, thunkAPI) => {
     try {
-      const response = await api.get(`/v1/indices/${id}`);
+      const response = await api.get(`/v1/cards/${id}`);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -45,13 +50,12 @@ export const getIndex = createAsyncThunk(
   }
 );
 
-
-export const addIndex = createAsyncThunk(
-  "indices/addIndex",
-  async (newBooklet: any, thunkAPI) => {
+export const addCard = createAsyncThunk(
+  "cards/addCard",
+  async (newCard: any, thunkAPI) => {
     try {
       const response = await api.post(
-        `/v1/indices`, newBooklet);
+        `/v1/cards`, newCard);
       return response.data;
     } catch (error: any) {
       if (error.response) {
@@ -63,14 +67,14 @@ export const addIndex = createAsyncThunk(
   }
 );
 
-export const editIndexName = createAsyncThunk(
-  "indices/editIndexName",
+export const editCard = createAsyncThunk(
+  "cards/editCard",
   async (modifiedItem: any, thunkAPI) => {
     try {
       const response = await api({
-        url: `/v1/indices/editIndexName`,
+        url: `/v1/cards`,
         data: modifiedItem,
-        method: "PATCH"
+        method: "PUT"
       });
       return response.data;
     } catch (error: any) {
@@ -84,12 +88,12 @@ export const editIndexName = createAsyncThunk(
 );
 
 
-export const deleteIndex = createAsyncThunk(
-  "indices/deleteIndex",
+export const deleteCard = createAsyncThunk(
+  "cards/deleteCard",
   async (id: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/indices/delete/${id}`,
+        url: `/v1/cards/delete/${id}`,
         method: "PATCH"
       });
       return id;
@@ -103,12 +107,12 @@ export const deleteIndex = createAsyncThunk(
   }
 );
 
-export const restoreIndex = createAsyncThunk(
-  "indices/restoreIndex",
+export const restoreCard = createAsyncThunk(
+  "cards/restoreCard",
   async (id: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/indices/restore/${id}`,
+        url: `/v1/cards/restore/${id}`,
         method: "PATCH"
       });
       return id;
@@ -122,12 +126,12 @@ export const restoreIndex = createAsyncThunk(
   }
 );
 
-export const deleteIndexPermanently = createAsyncThunk(
-  "indices/deleteIndexPermanently",
+export const deleteCardPermanently = createAsyncThunk(
+  "cards/deleteCardPermanently",
   async (id: any, thunkAPI) => {
     try {
       await api({
-        url: `/v1/indices/${id}`,
+        url: `/v1/cards/${id}`,
         method: "DELETE"
       });
       return id;
@@ -141,12 +145,17 @@ export const deleteIndexPermanently = createAsyncThunk(
   }
 );
 
-export const emptyIndicesTrash = createAsyncThunk(
-  "indices/emptyIndicesTrash",
-  async (bookletId: any, thunkAPI) => {
+export interface emptyCardsTrashParams {
+  bookletId: string | undefined;
+  indexId: string | null | undefined;
+}
+
+export const emptyCardsTrash = createAsyncThunk(
+  "cards/emptyCardsTrash",
+  async (params: emptyCardsTrashParams, thunkAPI) => {
     try {
       await api({
-        url: `/v1/indices/emptyTrash/${bookletId}`,
+        url: `/v1/cards/emptyTrash?bookletId=${params.bookletId}&indexId=${params.indexId}`,
         method: "DELETE"
       });
     } catch (error: any) {

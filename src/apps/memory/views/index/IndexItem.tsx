@@ -1,8 +1,6 @@
-import { Col, Dropdown, Modal, ProgressBar, Row, Spinner } from 'react-bootstrap';
+import { Col, Container, Dropdown, Modal, ProgressBar, Row, Spinner } from 'react-bootstrap';
 import { Index } from '../../models/index';
 import { useState } from 'react';
-import EditBookletTitle from './EditIndexName';
-import DeleteBookletPermanently from './DeleteIndexPermanently';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteIndex, restoreIndex } from '../../redux/index/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
@@ -10,13 +8,20 @@ import { showUndoAction, undoItemData } from '../../redux/general/reducers/undoA
 import { httpState } from '../../../../utils/httpRequest';
 import { PaginatedData } from '../../../../utils/paginatedData';
 import { undoItem } from '../../redux/index/indicesListReducer';
+import EditIndexName from './EditIndexName';
+import DeleteIndexPermanently from './DeleteIndexPermanently';
+import { getCardsListPath } from '../../../../route/paths';
+import { useNavigate } from 'react-router-dom';
 
-interface BookletProps {
+interface IndexProps {
   index: Index;
+  bookletId: string | undefined;
   itemIndex: number;
 }
 
-const IndexItem = ({ index, itemIndex }: BookletProps) => {
+const IndexItem = ({ index, bookletId, itemIndex }: IndexProps) => {
+  const navigate = useNavigate();
+  
   const [openShowModal, setOpenShowModal] = useState(false);
   const handleShowModelClose = () => setOpenShowModal(false);
   const handleShowModelOpen = () => setOpenShowModal(true);
@@ -41,9 +46,9 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const indicesListState = useSelector(
-    (state: any) => state.bookletsList as httpState<PaginatedData<Index>>);
+    (state: any) => state.indicesList as httpState<PaginatedData<Index>>);
 
-  const handleDeleteBooklet = (calledFromUndo: boolean = false) => {
+  const handleDeleting = (calledFromUndo: boolean = false) => {
     setIsLoading(true);
     dispatch(deleteIndex(index.id))
       .unwrap()
@@ -53,10 +58,10 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
         if (calledFromUndo === false) {
           dispatch(showUndoAction({
             description: 'Index deleted.',
-            onUndo: () => { handleRestoreBooklet(true); }
+            onUndo: () => { handleRestoring(true); }
           }));
-        }else{
-          dispatch(undoItem({index: itemIndex, item: index} as any));
+        } else {
+          dispatch(undoItem({ index: itemIndex, item: index } as any));
         }
       })
       .catch((error: any) => {
@@ -65,7 +70,7 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
       });
   };
 
-  const handleRestoreBooklet = (calledFromUndo: boolean = false) => {
+  const handleRestoring = (calledFromUndo: boolean = false) => {
     setIsLoading(true);
     dispatch(restoreIndex(index.id))
       .unwrap()
@@ -75,10 +80,10 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
         if (calledFromUndo === false) {
           dispatch(showUndoAction({
             description: 'Index restored.',
-            onUndo: () => { handleDeleteBooklet(true); }
+            onUndo: () => { handleDeleting(true); }
           }));
-        }else{
-          dispatch(undoItem({index: itemIndex, item: index} as any));
+        } else {
+          dispatch(undoItem({ index: itemIndex, item: index } as any));
         }
       })
       .catch((error: any) => {
@@ -87,14 +92,19 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
       });
   };
 
+  const handleCardsList = () => {
+    navigate(getCardsListPath(bookletId, index.id));
+  }
+
   return (
     <>
       <div className="border-bottom">
         <Row className="gx-2">
           <Col className="col-auto">
-            <p onClick={handleShowModelOpen}>
-              {index.name}
-            </p>
+            <span>
+              {/* <span style={{ fontSize: '11px' }}> {itemIndex + 1} - </span> */}
+              <span  onClick={handleShowModelOpen} style={{ fontSize: '16px' }}> {index.name} </span>
+            </span>
           </Col>
           <Col className="col-auto ms-auto">
             <div className="hover-actions end-0">
@@ -108,13 +118,13 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  {!index.isDeleted && <Dropdown.Item onClick={handleEditModelOpen}>Index Index</Dropdown.Item>}
+                  {!index.isDeleted && <Dropdown.Item onClick={handleCardsList}>Cards List</Dropdown.Item>}
                   {!index.isDeleted && <Dropdown.Divider />}
                   <Dropdown.Item onClick={handleShowModelOpen}>View</Dropdown.Item>
                   {!index.isDeleted && <Dropdown.Item onClick={handleEditModelOpen}>Edit</Dropdown.Item>}
-                  {!index.isDeleted && <Dropdown.Item onClick={() => handleDeleteBooklet()}>Delete</Dropdown.Item>}
+                  {!index.isDeleted && <Dropdown.Item onClick={() => handleDeleting()}>Delete</Dropdown.Item>}
 
-                  {index.isDeleted && <Dropdown.Item onClick={() => handleRestoreBooklet()}>Restore</Dropdown.Item>}
+                  {index.isDeleted && <Dropdown.Item onClick={() => handleRestoring()}>Restore</Dropdown.Item>}
                   {index.isDeleted && <Dropdown.Item onClick={handleDeletePermanentlyModelOpen}>Delete forever</Dropdown.Item>}
                 </Dropdown.Menu>
               </Dropdown>
@@ -146,7 +156,7 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
           <Modal.Title style={{ fontSize: '14px' }}>Edit index</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <EditBookletTitle onHide={handleEditModelClose} index={index}></EditBookletTitle>
+          <EditIndexName onHide={handleEditModelClose} index={index}></EditIndexName>
         </Modal.Body>
       </Modal>
 
@@ -156,7 +166,7 @@ const IndexItem = ({ index, itemIndex }: BookletProps) => {
         backdrop="static"
       >
         <Modal.Body className="p-4">
-          <DeleteBookletPermanently onHide={handleDeletePermanentlyModelClose} index={index}></DeleteBookletPermanently>
+          <DeleteIndexPermanently onHide={handleDeletePermanentlyModelClose} index={index}></DeleteIndexPermanently>
         </Modal.Body>
       </Modal>
     </>
@@ -167,15 +177,15 @@ export default IndexItem;
 
 const IndexDetail: React.FC<Index> = (index) => {
   return (
-    <Row className="row justify-content-center">
-      <Col>
-        <div className="email-detail-content px-4">
-          <div className="text-1000 fs-9 w-100 w-md-75 mb-8">
-            <span style={{ fontSize: '12px' }}> Title: <span style={{ fontSize: '15px' }}> {index.name}  </span> </span>
-          </div>
-        </div>
+    <Container>
+    <Row>
+      <Col sm={6}>
+      <span style={{ fontSize: '12px' }}> 
+        Title: <span style={{ fontSize: '15px' }}> {index.name}  </span> 
+      </span>
       </Col>
     </Row>
+  </Container>
   );
 };
 

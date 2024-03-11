@@ -1,22 +1,31 @@
-import { Col, Container, Dropdown, Modal, ProgressBar, Row, Spinner } from 'react-bootstrap';
-import { Booklet } from '../../models/booklet';
+import { Button, Col, Container, Dropdown, Modal, ProgressBar, Row, Spinner, Stack } from 'react-bootstrap';
+import { Card } from '../../models/card';
 import { useState } from 'react';
-import EditBookletTitle from './EditBookletTitle';
-import DeleteBookletPermanently from './DeleteBookletPermanently';
+import EditCardTitle from './EditCard';
+import DeleteCardPermanently from './DeleteCardPermanently';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteBooklet, restoreBooklet } from '../../redux/booklet/api';
+import { deleteCard, restoreCard } from '../../redux/card/api';
 import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { showUndoAction, undoItemData } from '../../redux/general/reducers/undoActionReducer';
-import { undoItem } from '../../redux/booklet/bookletsListReducer';
+import { undoItem } from '../../redux/card/cardsListReducer';
 import { useNavigate } from 'react-router-dom';
-import { getIndicesListPath } from '../../../../route/paths';
+import { PiSpeakerHigh } from "react-icons/pi";
 
-interface BookletProps {
-  booklet: Booklet;
+import axios from 'axios';
+
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+  }
+}
+
+interface CardProps {
+  card: Card;
   itemIndex: number;
 }
 
-const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
+const CardItem = ({ card, itemIndex }: CardProps) => {
   const navigate = useNavigate();
 
   const [openShowModal, setOpenShowModal] = useState(false);
@@ -42,24 +51,22 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
   let dispatch = useDispatch<any>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleIndices = () => {
-    navigate(getIndicesListPath(booklet.id));
-  }
+ 
 
   const handleDeleting = (calledFromUndo: boolean = false) => {
     setIsLoading(true);
-    dispatch(deleteBooklet(booklet.id))
+    dispatch(deleteCard(card.id))
       .unwrap()
       .then((data: any) => {
         setIsLoading(false);
 
         if (calledFromUndo === false) {
           dispatch(showUndoAction({
-            description: 'Booklet deleted.',
+            description: 'Card deleted.',
             onUndo: () => { handleRestoring(true); }
           }));
         } else {
-          dispatch(undoItem({ index: itemIndex, item: booklet } as any));
+          dispatch(undoItem({ index: itemIndex, item: card } as any));
         }
       })
       .catch((error: any) => {
@@ -70,18 +77,18 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
 
   const handleRestoring = (calledFromUndo: boolean = false) => {
     setIsLoading(true);
-    dispatch(restoreBooklet(booklet.id))
+    dispatch(restoreCard(card.id))
       .unwrap()
       .then((data: any) => {
         setIsLoading(false);
 
         if (calledFromUndo === false) {
           dispatch(showUndoAction({
-            description: 'Booklet restored.',
+            description: 'Card restored.',
             onUndo: () => { handleDeleting(true); }
           }));
         } else {
-          dispatch(undoItem({ index: itemIndex, item: booklet } as any));
+          dispatch(undoItem({ index: itemIndex, item: card } as any));
         }
       })
       .catch((error: any) => {
@@ -90,14 +97,68 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
       });
   };
 
+  //
+
+ 
+  const speak = async (text: string, language: string) => {
+ let lang = '';
+    if(language == 'DE')
+    lang = 'de-de';
+  else if(language == 'EN')
+    lang = 'en-us';
+
+  const encodedParams = new URLSearchParams();
+  encodedParams.set('src', text);
+  encodedParams.set('hl', lang);
+  encodedParams.set('r', '0');
+  encodedParams.set('c', 'mp3');
+  encodedParams.set('f', '8khz_8bit_mono');
+  
+  const options = {
+    method: 'POST',
+    url: 'https://voicerss-text-to-speech.p.rapidapi.com/',
+    params: {key: '<REQUIRED>'},
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      'X-RapidAPI-Key': 'SIGN-UP-FOR-KEY',
+      'X-RapidAPI-Host': 'voicerss-text-to-speech.p.rapidapi.com'
+    },
+    data: encodedParams,
+  };
+  
+  try {
+    const response = await axios.request(options);
+    console.log(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+  };
+  
   return (
     <>
       <div className="border-bottom">
         <Row className="gx-2">
-          <Col className="col-auto">
-            <p onClick={handleShowModelOpen}>
-              {booklet.title}
-            </p>
+          <Col >
+            <Container>
+              <Row>
+                <Col sm={6}>
+                  <span >
+                    <PiSpeakerHigh onClick={() => {speak(card.expression, card.expressionLanguage);}} />
+                  </span>
+                  <span style={{ paddingLeft: '5px' }}>
+                    {card.expression}
+                  </span>
+                </Col>
+                <Col sm={6}>
+                  <span >
+                    <PiSpeakerHigh onClick={() => {speak(card.translation, card.translationLanguage);}}/>
+                  </span>
+                  <span style={{ paddingLeft: '5px' }}>
+                    {card.translation}
+                  </span>
+                </Col>
+              </Row>
+            </Container>
           </Col>
           <Col className="col-auto ms-auto">
             <div className="hover-actions end-0">
@@ -111,14 +172,12 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  {!booklet.isDeleted && <Dropdown.Item onClick={handleIndices}>Indices</Dropdown.Item>}
-                  {!booklet.isDeleted && <Dropdown.Divider />}
                   <Dropdown.Item onClick={handleShowModelOpen}>View</Dropdown.Item>
-                  {!booklet.isDeleted && <Dropdown.Item onClick={handleEditModelOpen}>Edit</Dropdown.Item>}
-                  {!booklet.isDeleted && <Dropdown.Item onClick={() => handleDeleting()}>Delete</Dropdown.Item>}
+                  {!card.isDeleted && <Dropdown.Item onClick={handleEditModelOpen}>Edit</Dropdown.Item>}
+                  {!card.isDeleted && <Dropdown.Item onClick={() => handleDeleting()}>Delete</Dropdown.Item>}
 
-                  {booklet.isDeleted && <Dropdown.Item onClick={() => handleRestoring()}>Restore</Dropdown.Item>}
-                  {booklet.isDeleted && <Dropdown.Item onClick={handleDeletePermanentlyModelOpen}>Delete forever</Dropdown.Item>}
+                  {card.isDeleted && <Dropdown.Item onClick={() => handleRestoring()}>Restore</Dropdown.Item>}
+                  {card.isDeleted && <Dropdown.Item onClick={handleDeletePermanentlyModelOpen}>Delete forever</Dropdown.Item>}
                 </Dropdown.Menu>
               </Dropdown>
             </div>
@@ -132,10 +191,9 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
         onHide={handleShowModelClose}
       >
         <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: '14px' }}>Booklet</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <BookletDetail {...booklet}></BookletDetail>
+          <CardDetail {...card}></CardDetail>
         </Modal.Body>
       </Modal>
 
@@ -146,10 +204,10 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
         backdrop="static"
       >
         <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: '14px' }}>Edit booklet</Modal.Title>
+          <Modal.Title style={{ fontSize: '14px' }}>Edit card</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <EditBookletTitle onHide={handleEditModelClose} booklet={booklet}></EditBookletTitle>
+          <EditCardTitle onHide={handleEditModelClose} card={card}></EditCardTitle>
         </Modal.Body>
       </Modal>
 
@@ -159,23 +217,24 @@ const BookletItem = ({ booklet, itemIndex }: BookletProps) => {
         backdrop="static"
       >
         <Modal.Body className="p-4">
-          <DeleteBookletPermanently onHide={handleDeletePermanentlyModelClose} booklet={booklet}></DeleteBookletPermanently>
+          <DeleteCardPermanently onHide={handleDeletePermanentlyModelClose} card={card}></DeleteCardPermanently>
         </Modal.Body>
       </Modal>
     </>
   );
 };
 
-export default BookletItem;
+export default CardItem;
 
-const BookletDetail: React.FC<Booklet> = (booklet) => {
+const CardDetail: React.FC<Card> = (card) => {
   return (
     <Container>
       <Row>
         <Col sm={6}>
-          <span style={{ fontSize: '12px' }}>
-             Title: <span style={{ fontSize: '15px' }}> {booklet.title}  </span>
-          </span>
+          {card.expression}
+        </Col>
+        <Col sm={6}>
+          {card.translation}
         </Col>
       </Row>
     </Container>

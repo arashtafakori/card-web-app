@@ -33,7 +33,7 @@ const EditIndexName = ({ index, onHide }: IndexProps) => {
       .max(title_maxLength, 'Too Long!')
       .required('Required')
   });
-  const handleCreateIndex = (values: FormValues, approveSubmitting: Function) => {
+  const handleEditing = (values: FormValues, approveSubmitting: Function) => {
     dispatch(editIndexName(values))
       .unwrap()
       .then((data: any) => {
@@ -58,7 +58,7 @@ const EditIndexName = ({ index, onHide }: IndexProps) => {
             values: FormValues,
             { setSubmitting }: FormikHelpers<FormValues>
           ) => {
-            handleCreateIndex(values,
+            handleEditing(values,
               () => {
                 setSubmitting(false);
               }

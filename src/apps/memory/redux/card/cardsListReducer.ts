@@ -1,25 +1,32 @@
-import {addIndex, deleteIndex, deleteIndexPermanently, editIndexName, emptyIndicesTrash, getIndicesList, restoreIndex} from "./api";
+import {
+  getCardsList, addCard,
+  editCard, deleteCardPermanently, deleteCard, restoreCard, emptyCardsTrash
+} from "./api";
 import { ModelState, getStatus, getTypePrefix } from "../../../../utils/httpRequest";
-import { Index } from "../../models";
+import { Card } from "../../models/card";
 import { createSlice } from "@reduxjs/toolkit";
  
-let indicesListReducer = {
+let cardsListReducer = {
   undoItem: (state: any, action: any) => {
-    state.data.splice(action.payload.index, 0, action.payload.item);
+    state.data.items.splice(action.payload.index, 0, action.payload.item);
   }
 };
 
-export let indicesListExtraReducer = (builder: any) => {
-  builder.addCase(getIndicesList.pending, (state: any, action: any) => {
+export let cardsListExtraReducer = (builder: any) => {
+  builder.addCase(getCardsList.pending, (state: any, action: any) => {
     state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(getIndicesList.fulfilled, (state: any, action: any) => {
+    .addCase(getCardsList.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
+      
+      if(action.payload.pageNumber != 1)
+        action.payload.items.unshift(state.data);
+
       state.data = action.payload;
     })
-    .addCase(getIndicesList.rejected, (state: any, action: any) => {
+    .addCase(getCardsList.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -27,16 +34,16 @@ export let indicesListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(addIndex.pending, (state: any, action: any) => {
+  builder.addCase(addCard.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(addIndex.fulfilled, (state: any, action: any) => {
+    .addCase(addCard.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
-      state.data.push(action.payload);
+      state.data.items.unshift(action.payload);
     })
-    .addCase(addIndex.rejected, (state: any, action: any) => {
+    .addCase(addCard.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.payload;
@@ -44,19 +51,19 @@ export let indicesListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(editIndexName.pending, (state: any, action: any) => {
+  builder.addCase(editCard.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(editIndexName.fulfilled, (state: any, action: any) => {
+    .addCase(editCard.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const updatedItem = action.payload;
-      const index = state.data.findIndex(
+      const index = state.data.items.findIndex(
         (item: any) => item.id === updatedItem.id);
-      if (index !== -1) state.data[index] = updatedItem;
+      if (index !== -1) state.data.items[index] = updatedItem;
     })
-    .addCase(editIndexName.rejected, (state: any, action: any) => {
+    .addCase(editCard.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -64,20 +71,20 @@ export let indicesListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(deleteIndex.pending, (state: any, action: any) => {
+  builder.addCase(deleteCard.pending, (state: any, action: any) => {
     state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(deleteIndex.fulfilled, (state: any, action: any) => {
+    .addCase(deleteCard.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const deletedtItemId = action.payload;
-      let index = state.data.findIndex(
+      let index = state.data.items.findIndex(
         (item: any) => item.id === deletedtItemId);
       if (index !== -1)
-        state.data.splice(index, 1);
+        state.data.items.splice(index, 1);
     })
-    .addCase(deleteIndex.rejected, (state: any, action: any) => {
+    .addCase(deleteCard.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -85,20 +92,20 @@ export let indicesListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(restoreIndex.pending, (state: any, action: any) => {
+  builder.addCase(restoreCard.pending, (state: any, action: any) => {
     state.typePrefix = getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(restoreIndex.fulfilled, (state: any, action: any) => {
+    .addCase(restoreCard.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const restoredItemId = action.payload;
-      let index = state.data.findIndex(
+      let index = state.data.items.findIndex(
         (item: any) => item.id === restoredItemId);
       if (index !== -1)
-        state.data.splice(index, 1);
+        state.data.items.splice(index, 1);
     })
-    .addCase(restoreIndex.rejected, (state: any, action: any) => {
+    .addCase(restoreCard.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -106,20 +113,20 @@ export let indicesListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(deleteIndexPermanently.pending, (state: any, action: any) => {
+  builder.addCase(deleteCardPermanently.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(deleteIndexPermanently.fulfilled, (state: any, action: any) => {
+    .addCase(deleteCardPermanently.fulfilled, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       const deletedtItemId = action.payload;
-      let index = state.data.findIndex(
+      let index = state.data.items.findIndex(
         (item: any) => item.id === deletedtItemId);
       if (index !== -1)
-        state.data.splice(index, 1);
+        state.data.items.splice(index, 1);
     })
-    .addCase(deleteIndexPermanently.rejected, (state: any, action: any) => {
+    .addCase(deleteCardPermanently.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -127,17 +134,17 @@ export let indicesListExtraReducer = (builder: any) => {
 
   //----
 
-  builder.addCase(emptyIndicesTrash.pending, (state: any, action: any) => {
+  builder.addCase(emptyCardsTrash.pending, (state: any, action: any) => {
     state.typePrefix =  getTypePrefix(action.type);
     state.status = getStatus(action.type);
   })
-    .addCase(emptyIndicesTrash.fulfilled, (state: any, action: any) => {
+    .addCase(emptyCardsTrash.fulfilled, (state: any, action: any) => {
  
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
-      state.data = (ModelState.initiateListData<Index>()).data;
+      state.data = (ModelState.initiatePaginatedData<Card>()).data;
     })
-    .addCase(emptyIndicesTrash.rejected, (state: any, action: any) => {
+    .addCase(emptyCardsTrash.rejected, (state: any, action: any) => {
       state.typePrefix =  getTypePrefix(action.type);
       state.status = getStatus(action.type);
       state.error = action.error;
@@ -145,12 +152,12 @@ export let indicesListExtraReducer = (builder: any) => {
 };
  
 
-var indicesListSlice = createSlice({
-  name: "indices-list",
-  initialState: ModelState.initiateListData<Index>(),
-  reducers: indicesListReducer,
-  extraReducers: indicesListExtraReducer
+var cardsListSlice = createSlice({
+  name: "cards-list",
+  initialState: ModelState.initiatePaginatedData<Card>(),
+  reducers: cardsListReducer,
+  extraReducers: cardsListExtraReducer
 });
 
-export default indicesListSlice;
-export const { undoItem } = indicesListSlice.actions;
+export default cardsListSlice;
+export const { undoItem } = cardsListSlice.actions;

@@ -1,7 +1,7 @@
 import { FaAngleLeft } from "react-icons/fa";
 import { Card, Row, Col, Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import { BOOKLETS_PATH } from '../../../../paths';
+import { BOOKLETS_PATH } from '../../../../route/paths';
 // import { useSelector, useDispatch } from "react-redux";
 // import { useEffect } from 'react';
 // import { getBooklet } from '../../redux/booklet/api';
@@ -15,14 +15,14 @@ import { getBooklet } from "../../redux/booklet/api";
 const ShowBooklet = () => {
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  const { bookletId } = useParams();
 
   // const location = useLocation();
   // const booklet = location.state?.booklet as Booklet;
 
   let dispatch = useDispatch<any>();
   useEffect(() => {
-    dispatch(getBooklet(id));
+    dispatch(getBooklet(bookletId));
   }, [dispatch]);
   const httpState = useSelector((state: any) => state.booklet as httpState<Booklet>)
   const booklet = httpState.data as Booklet;

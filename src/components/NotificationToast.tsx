@@ -23,7 +23,7 @@ const NotificationToast = () => {
             position={'top-end'}
             style={{ zIndex: 1080, position: 'fixed' }}
         >
-            <Toast bg={"warning"} show={show} onClose={() => setShow(false)} delay={3000} autohide>
+            <Toast bg={"warning"} show={show} onClose={() => setShow(false)} delay={8000} autohide>
                 <Toast.Header>
                     <strong className="mr-auto">Message</strong>
                 </Toast.Header>

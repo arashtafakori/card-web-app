@@ -1,4 +1,4 @@
-import { PaginatedData } from './paginatedData';
+import { PaginatedData } from "./paginatedData";
 
 export enum httpRequestStatus {
   Pending,
@@ -29,6 +29,15 @@ export class ModelState {
         hasNextPage: false,
         items: []
       },
+      status: httpRequestStatus.Pending,
+      error: null,
+      typePrefix: null
+    };
+  }
+
+  public static initiateListData<TModel>(): httpState<TModel[]> {
+    return {
+      data: [],
       status: httpRequestStatus.Pending,
       error: null,
       typePrefix: null
