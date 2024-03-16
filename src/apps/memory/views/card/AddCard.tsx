@@ -14,6 +14,7 @@ interface FormValues {
   expressionLanguage: string;
   translation: string | null;
   translationLanguage: string | null;
+  description: string | null;
 }
 
 interface CardProps {
@@ -29,12 +30,14 @@ const AddCard= ({ bookletId, indexId, onHide }: CardProps) => {
     expression: '',
     expressionLanguage: 'de',
     translation: '',
-    translationLanguage: 'en'
+    translationLanguage: 'en',
+    description: ''
   };
 
   const { Formik } = formik;
   const expression_maxLength = 1024;
   const translation_maxLength = 1024;
+  const description_maxLength = 1024;
 
   const schema = yup.object().shape({
     expression: yup.string()
@@ -43,6 +46,8 @@ const AddCard= ({ bookletId, indexId, onHide }: CardProps) => {
       .required('Required'),
        translation: yup.string()
       .min(1, 'Too Short!')
+      .max(translation_maxLength, 'Too Long!'),
+      description: yup.string()
       .max(translation_maxLength, 'Too Long!')
   });
 
@@ -123,6 +128,29 @@ const AddCard= ({ bookletId, indexId, onHide }: CardProps) => {
                       />
                       <Form.Control.Feedback type="invalid">
                         {errors.translation}
+                      </Form.Control.Feedback>
+                    </InputGroup>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row className="mb-3">
+                <Col>
+                  <Form.Group as={Col} controlId="validationFormik01">
+                    <Form.Label>Description</Form.Label>
+                    <InputGroup hasValidation>
+                      <Form.Control
+                        type="text"
+                        name="description"
+                        placeholder=""
+                        value={values.description!}
+                        onChange={handleChange}
+                        isInvalid={!!errors.description}
+                        isValid={touched.description && !errors.description}
+                        maxLength={description_maxLength}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.description}
                       </Form.Control.Feedback>
                     </InputGroup>
                   </Form.Group>

@@ -12,6 +12,7 @@ export interface Card {
   expressionLanguage: string;
   translation: string;
   translationLanguage: string;
+  description: string;
 }
 
 export const initialCard: httpState<Card> = {
@@ -25,7 +26,8 @@ export const initialCard: httpState<Card> = {
     expression: '',
     expressionLanguage: '',
     translation: '',
-    translationLanguage: ''
+    translationLanguage: '',
+    description: ''
   },
   status: httpRequestStatus.Pending,
   error: null,

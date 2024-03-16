@@ -9,10 +9,6 @@ import { notifyError } from '../../redux/general/reducers/notificationReducer';
 import { showUndoAction, undoItemData } from '../../redux/general/reducers/undoActionReducer';
 import { undoItem } from '../../redux/card/cardsListReducer';
 import { useNavigate } from 'react-router-dom';
-import { PiSpeakerHigh } from "react-icons/pi";
-
-import axios from 'axios';
-
 
 declare global {
   interface Window {
@@ -99,41 +95,6 @@ const CardItem = ({ card, itemIndex }: CardProps) => {
 
   //
 
- 
-  const speak = async (text: string, language: string) => {
- let lang = '';
-    if(language == 'DE')
-    lang = 'de-de';
-  else if(language == 'EN')
-    lang = 'en-us';
-
-  const encodedParams = new URLSearchParams();
-  encodedParams.set('src', text);
-  encodedParams.set('hl', lang);
-  encodedParams.set('r', '0');
-  encodedParams.set('c', 'mp3');
-  encodedParams.set('f', '8khz_8bit_mono');
-  
-  const options = {
-    method: 'POST',
-    url: 'https://voicerss-text-to-speech.p.rapidapi.com/',
-    params: {key: '<REQUIRED>'},
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-      'X-RapidAPI-Key': 'SIGN-UP-FOR-KEY',
-      'X-RapidAPI-Host': 'voicerss-text-to-speech.p.rapidapi.com'
-    },
-    data: encodedParams,
-  };
-  
-  try {
-    const response = await axios.request(options);
-    console.log(response.data);
-  } catch (error) {
-    console.error(error);
-  }
-  };
-  
   return (
     <>
       <div className="border-bottom">
@@ -142,17 +103,17 @@ const CardItem = ({ card, itemIndex }: CardProps) => {
             <Container>
               <Row>
                 <Col sm={6}>
-                  <span >
-                    <PiSpeakerHigh onClick={() => {speak(card.expression, card.expressionLanguage);}} />
-                  </span>
+                  {/* <span >
+                    <PiSpeakerHigh />
+                  </span> */}
                   <span style={{ paddingLeft: '5px' }}>
                     {card.expression}
                   </span>
                 </Col>
                 <Col sm={6}>
-                  <span >
-                    <PiSpeakerHigh onClick={() => {speak(card.translation, card.translationLanguage);}}/>
-                  </span>
+                  {/* <span >
+                    <PiSpeakerHigh/>
+                  </span> */}
                   <span style={{ paddingLeft: '5px' }}>
                     {card.translation}
                   </span>
@@ -235,6 +196,10 @@ const CardDetail: React.FC<Card> = (card) => {
         </Col>
         <Col sm={6}>
           {card.translation}
+        </Col>
+        <hr/>
+        <Col>
+          {card.description}
         </Col>
       </Row>
     </Container>
